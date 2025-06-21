@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # IMDB Sentiment Analysis Demo
 
 A comprehensive comparison of three different approaches to sentiment analysis on the IMDB movie reviews dataset.
@@ -254,7 +253,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 **Note**: This project demonstrates modern NLP techniques and is intended for educational and research purposes.
-=======
-# IMDB-Sentiment-Analysis-Demo
-Demo on IMDB Sentiment Analysis ML Model
->>>>>>> e4b850097887c9bd08d174bc6cc57fa6145930df
