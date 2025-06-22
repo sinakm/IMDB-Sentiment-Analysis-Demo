@@ -23,7 +23,8 @@ COPY models/ ./models/
 # Verify model files are in place
 RUN ls -la ./models/ && \
     ls -la ./models/lstm/ 2>/dev/null || echo "LSTM models not found" && \
-    ls -la ./models/verbalizer/ 2>/dev/null || echo "Verbalizer models not found"
+    ls -la ./models/verbalizer/ 2>/dev/null || echo "Verbalizer models not found" && \
+    ls -la ./models/modernbert/ 2>/dev/null || echo "ModernBERT models not found"
 
 # Set the CMD to your handler
 CMD ["lambda_function.lambda_handler"]

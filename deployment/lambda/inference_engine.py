@@ -15,6 +15,11 @@ from typing import Dict, Any, List, Optional
 from transformers import AutoTokenizer, AutoModel
 import logging
 
+# Configure PyTorch for Lambda environment
+os.environ['TORCH_COMPILE_DISABLE'] = '1'  # Disable torch.compile
+torch.set_num_threads(1)  # Single thread for Lambda
+torch.set_num_interop_threads(1)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,7 +47,15 @@ class LSTMInference:
         # Load model
         self.model = self._create_model()
         checkpoint = torch.load(model_path, map_location=self.device)
-        self.model.load_state_dict(checkpoint)
+        
+        # Handle different checkpoint formats
+        if 'model_state_dict' in checkpoint:
+            # Training checkpoint format
+            self.model.load_state_dict(checkpoint['model_state_dict'])
+        else:
+            # Direct state dict format
+            self.model.load_state_dict(checkpoint)
+        
         self.model.eval()
         
         logger.info(f"LSTM model loaded with {self.vocab_size} vocabulary size")
@@ -67,11 +80,8 @@ class LSTMInference:
                 lstm_output_dim = config['hidden_dim'] * (2 if config['bidirectional'] else 1)
                 self.attention = nn.Linear(lstm_output_dim, 1)
                 
-                # Classifier
-                self.classifier = nn.Sequential(
-                    nn.Dropout(config['dropout']),
-                    nn.Linear(lstm_output_dim, 1)
-                )
+                # Classifier (direct Linear layer to match training)
+                self.classifier = nn.Linear(lstm_output_dim, 1)
                 
             def forward(self, input_ids, attention_mask=None, lengths=None):
                 # Embedding
@@ -154,17 +164,48 @@ class VerbalizerInference:
         with open(config_path, 'r') as f:
             self.config = json.load(f)
         
-        # Load ModernBERT tokenizer
-        self.tokenizer = AutoTokenizer.from_pretrained("answerdotai/ModernBERT-base")
-        
-        # Load ModernBERT model for embeddings
-        self.bert_model = AutoModel.from_pretrained("answerdotai/ModernBERT-base")
-        self.bert_model.eval()
+        # Load ModernBERT from local directory
+        try:
+            # Check if we have local ModernBERT files
+            models_dir = Path(model_path).parent.parent
+            modernbert_path = models_dir / "modernbert"
+            
+            logger.info(f"Looking for ModernBERT at: {modernbert_path}")
+            logger.info(f"ModernBERT path exists: {modernbert_path.exists()}")
+            
+            if modernbert_path.exists():
+                # Load from local files
+                logger.info("Loading ModernBERT tokenizer from local files...")
+                self.tokenizer = AutoTokenizer.from_pretrained(str(modernbert_path))
+                
+                logger.info("Loading ModernBERT model from local files...")
+                self.bert_model = AutoModel.from_pretrained(str(modernbert_path))
+                self.bert_model.eval()
+                
+                logger.info("ModernBERT loaded successfully from local files")
+            else:
+                logger.error(f"ModernBERT not found at {modernbert_path}")
+                self.tokenizer = None
+                self.bert_model = None
+        except Exception as e:
+            logger.error(f"Failed to load ModernBERT: {e}")
+            import traceback
+            logger.error(f"ModernBERT traceback: {traceback.format_exc()}")
+            self.tokenizer = None
+            self.bert_model = None
         
         # Load verbalizer classifier
         self.classifier = self._create_classifier()
         checkpoint = torch.load(model_path, map_location=self.device)
-        self.classifier.load_state_dict(checkpoint)
+        
+        # Handle different checkpoint formats
+        if 'model_state_dict' in checkpoint:
+            # Training checkpoint format
+            self.classifier.load_state_dict(checkpoint['model_state_dict'])
+        else:
+            # Direct state dict format
+            self.classifier.load_state_dict(checkpoint)
+        
         self.classifier.eval()
         
         # Verbalizer template
@@ -200,12 +241,14 @@ class VerbalizerInference:
                     nn.Linear(hidden_dim // 2, 1)              # Output layer
                 )
             
-            def forward(self, input_ids, attention_mask=None, lengths=None, embeddings=None):
-                # Use embeddings directly
+            def forward(self, input_ids=None, attention_mask=None, lengths=None, embeddings=None):
+                # Use embeddings directly if provided, otherwise use input_ids
                 if embeddings is not None:
                     input_embeddings = embeddings
-                else:
+                elif input_ids is not None:
                     input_embeddings = input_ids
+                else:
+                    raise ValueError("Either embeddings or input_ids must be provided")
                 
                 # Forward pass through classifier
                 logits = self.classifier(input_embeddings)
@@ -216,6 +259,18 @@ class VerbalizerInference:
     def predict(self, text: str) -> Dict[str, Any]:
         """Run inference on text using verbalizer approach."""
         start_time = time.time()
+        
+        # Check if ModernBERT is available
+        if self.tokenizer is None or self.bert_model is None:
+            # Fallback: return error for now since verbalizer needs ModernBERT
+            processing_time = int((time.time() - start_time) * 1000)
+            return {
+                "prediction": "error",
+                "confidence": 0.0,
+                "probability": 0.0,
+                "processing_time_ms": processing_time,
+                "error": "ModernBERT not available for verbalizer model"
+            }
         
         # Add verbalizer template
         verbalized_text = text + self.template
@@ -268,27 +323,50 @@ class SentimentInferenceEngine:
         
         logger.info("Initializing sentiment inference engine...")
         
+        # Debug: Check if models directory exists
+        logger.info(f"Models directory: {self.models_dir}")
+        logger.info(f"Models directory exists: {self.models_dir.exists()}")
+        if self.models_dir.exists():
+            logger.info(f"Contents: {list(self.models_dir.iterdir())}")
+        
         # Initialize LSTM
         try:
+            lstm_model_path = str(self.models_dir / "lstm" / "model.pt")
+            lstm_config_path = str(self.models_dir / "lstm" / "config.json")
+            lstm_vocab_path = str(self.models_dir / "lstm" / "vocab.json")
+            
+            logger.info(f"LSTM paths - model: {lstm_model_path}, config: {lstm_config_path}, vocab: {lstm_vocab_path}")
+            logger.info(f"LSTM files exist - model: {Path(lstm_model_path).exists()}, config: {Path(lstm_config_path).exists()}, vocab: {Path(lstm_vocab_path).exists()}")
+            
             self.models['lstm'] = LSTMInference(
-                model_path=str(self.models_dir / "lstm" / "model.pt"),
-                config_path=str(self.models_dir / "lstm" / "config.json"),
-                vocab_path=str(self.models_dir / "lstm" / "vocab.json")
+                model_path=lstm_model_path,
+                config_path=lstm_config_path,
+                vocab_path=lstm_vocab_path
             )
-            logger.info("✅ LSTM model initialized")
+            logger.info("LSTM model initialized successfully")
         except Exception as e:
-            logger.error(f"❌ Failed to initialize LSTM: {e}")
+            logger.error(f"Failed to initialize LSTM: {e}")
+            import traceback
+            logger.error(f"LSTM traceback: {traceback.format_exc()}")
             self.models['lstm'] = None
         
         # Initialize Verbalizer
         try:
+            verbalizer_model_path = str(self.models_dir / "verbalizer" / "model.pt")
+            verbalizer_config_path = str(self.models_dir / "verbalizer" / "config.json")
+            
+            logger.info(f"Verbalizer paths - model: {verbalizer_model_path}, config: {verbalizer_config_path}")
+            logger.info(f"Verbalizer files exist - model: {Path(verbalizer_model_path).exists()}, config: {Path(verbalizer_config_path).exists()}")
+            
             self.models['verbalizer'] = VerbalizerInference(
-                model_path=str(self.models_dir / "verbalizer" / "model.pt"),
-                config_path=str(self.models_dir / "verbalizer" / "config.json")
+                model_path=verbalizer_model_path,
+                config_path=verbalizer_config_path
             )
-            logger.info("✅ Verbalizer model initialized")
+            logger.info("Verbalizer model initialized successfully")
         except Exception as e:
-            logger.error(f"❌ Failed to initialize Verbalizer: {e}")
+            logger.error(f"Failed to initialize Verbalizer: {e}")
+            import traceback
+            logger.error(f"Verbalizer traceback: {traceback.format_exc()}")
             self.models['verbalizer'] = None
     
     def predict_single(self, text: str, model_name: str) -> Dict[str, Any]:

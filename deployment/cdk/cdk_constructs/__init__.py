@@ -7,9 +7,11 @@ This package contains reusable CDK constructs for building the sentiment analysi
 from .lambda_construct import SentimentLambdaConstruct
 from .api_gateway_construct import SentimentApiGatewayConstruct
 from .monitoring_construct import SentimentMonitoringConstruct
+from .frontend_construct import SentimentFrontendConstruct
 
 __all__ = [
     "SentimentLambdaConstruct",
     "SentimentApiGatewayConstruct", 
-    "SentimentMonitoringConstruct"
+    "SentimentMonitoringConstruct",
+    "SentimentFrontendConstruct"
 ]

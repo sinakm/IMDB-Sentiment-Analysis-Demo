@@ -47,7 +47,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -115,7 +115,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -149,7 +149,7 @@
     ],
     "Code": {
      "ImageUri": {
-      "Fn::Sub": "${AWS::AccountId}.dkr.ecr.us-east-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-${AWS::AccountId}-us-east-1:d9e1feb275a216e0021518b10fd1bc8a89d54c424708e6bf76a2c114dd973ff6"
+      "Fn::Sub": "${AWS::AccountId}.dkr.ecr.us-east-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-${AWS::AccountId}-us-east-1:5f1077b6daf7779a88306d46c3ac28280596196716d8124efb5a08ce51fe7247"
      }
     },
     "Description": "Sentiment analysis using LSTM and Verbalizer models",
@@ -165,7 +165,7 @@
       "TAG_MANAGEDBY": "CDK",
       "TAG_SERVICE": "sentiment-analysis-api",
       "TAG_RESOURCETYPE": "Lambda-Function",
-      "TAG_MODELTYPES": "LSTM,Verbalizer"
+      "TAG_MODELTYPES": "LSTM-Verbalizer"
      }
     },
     "FunctionName": "sentiment-analysis-function-prod",
@@ -197,7 +197,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -224,7 +224,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "SentimentAnalysisStack/LambdaConstruct/Function/Resource",
-    "aws:asset:path": "asset.d9e1feb275a216e0021518b10fd1bc8a89d54c424708e6bf76a2c114dd973ff6",
+    "aws:asset:path": "asset.5f1077b6daf7779a88306d46c3ac28280596196716d8124efb5a08ce51fe7247",
     "aws:asset:dockerfile-path": "Dockerfile",
     "aws:asset:docker-build-args": {
      "BUILDPLATFORM": "linux/amd64"
@@ -257,7 +257,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -325,7 +325,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -370,7 +370,7 @@
     "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Account"
    }
   },
-  "ApiGatewayConstructRestApiDeploymentD0BFA00F73354163feaddffed2fae1b096902734": {
+  "ApiGatewayConstructRestApiDeploymentD0BFA00F9fc4a5b157c65b2630ef825374d44a87": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "Description": "API for sentiment analysis using multiple ML models",
@@ -400,7 +400,7 @@
    "Type": "AWS::ApiGateway::Stage",
    "Properties": {
     "DeploymentId": {
-     "Ref": "ApiGatewayConstructRestApiDeploymentD0BFA00F73354163feaddffed2fae1b096902734"
+     "Ref": "ApiGatewayConstructRestApiDeploymentD0BFA00F9fc4a5b157c65b2630ef825374d44a87"
     },
     "MethodSettings": [
      {
@@ -432,7 +432,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -1090,7 +1090,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -1148,7 +1148,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -1227,7 +1227,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -1288,7 +1288,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -1349,7 +1349,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -1408,7 +1408,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -1467,7 +1467,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",
@@ -1526,7 +1526,7 @@
      },
      {
       "Key": "ModelTypes",
-      "Value": "LSTM,Verbalizer"
+      "Value": "LSTM-Verbalizer"
      },
      {
       "Key": "Owner",

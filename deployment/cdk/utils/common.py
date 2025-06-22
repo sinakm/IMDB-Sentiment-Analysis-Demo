@@ -31,6 +31,19 @@ def get_resource_name(base_name: str, resource_type: str, environment: str = "pr
     return f"{clean_base}-{clean_type}-{clean_env}"
 
 
+def sanitize_tag_value(value: str) -> str:
+    """
+    Sanitize tag value to meet AWS requirements.
+    Valid characters are [a-zA-Z+-=._:/]
+    """
+    # Replace invalid characters with hyphens
+    sanitized = re.sub(r'[^a-zA-Z0-9+\-=._:/]', '-', str(value))
+    # Remove multiple consecutive hyphens
+    sanitized = re.sub(r'-+', '-', sanitized)
+    # Trim to max 256 characters
+    return sanitized[:256].strip('-')
+
+
 def get_tags(
     project_name: str = "sentiment-analysis",
     environment: str = "prod",
@@ -49,21 +62,26 @@ def get_tags(
         additional_tags: Additional custom tags
     
     Returns:
-        Dictionary of tags
+        Dictionary of tags with sanitized values
     """
     tags = {
-        "Project": project_name,
-        "Environment": environment,
-        "Owner": owner,
+        "Project": sanitize_tag_value(project_name),
+        "Environment": sanitize_tag_value(environment),
+        "Owner": sanitize_tag_value(owner),
         "ManagedBy": "CDK",
         "Service": "sentiment-analysis-api"
     }
     
     if cost_center:
-        tags["CostCenter"] = cost_center
+        tags["CostCenter"] = sanitize_tag_value(cost_center)
     
     if additional_tags:
-        tags.update(additional_tags)
+        # Sanitize additional tags
+        for key, value in additional_tags.items():
+            # Sanitize both key and value
+            clean_key = re.sub(r'[^a-zA-Z0-9+\-=._:/]', '-', str(key))[:128]
+            clean_value = sanitize_tag_value(value)
+            tags[clean_key] = clean_value
     
     return tags
 

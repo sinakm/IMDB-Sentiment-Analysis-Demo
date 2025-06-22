@@ -1,7 +1,7 @@
 {
   "version": "44.0.0",
   "files": {
-    "84ab30d3ef329e8262078c435ff720d6f9adc73e8662ae33c54bcb218103619e": {
+    "f3105591dd91d52cf2e119fa2deb0f3798e857a96721c3448e3c0a2512f996c0": {
       "displayName": "SentimentAnalysisStack Template",
       "source": {
         "path": "SentimentAnalysisStack.template.json",
@@ -10,7 +10,7 @@
       "destinations": {
         "current_account-us-east-1": {
           "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
-          "objectKey": "84ab30d3ef329e8262078c435ff720d6f9adc73e8662ae33c54bcb218103619e.json",
+          "objectKey": "f3105591dd91d52cf2e119fa2deb0f3798e857a96721c3448e3c0a2512f996c0.json",
           "region": "us-east-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
         }
@@ -18,10 +18,10 @@
     }
   },
   "dockerImages": {
-    "d9e1feb275a216e0021518b10fd1bc8a89d54c424708e6bf76a2c114dd973ff6": {
+    "5f1077b6daf7779a88306d46c3ac28280596196716d8124efb5a08ce51fe7247": {
       "displayName": "LambdaConstruct/Function/AssetImage",
       "source": {
-        "directory": "asset.d9e1feb275a216e0021518b10fd1bc8a89d54c424708e6bf76a2c114dd973ff6",
+        "directory": "asset.5f1077b6daf7779a88306d46c3ac28280596196716d8124efb5a08ce51fe7247",
         "dockerBuildArgs": {
           "BUILDPLATFORM": "linux/amd64"
         },
@@ -30,7 +30,7 @@
       "destinations": {
         "current_account-us-east-1": {
           "repositoryName": "cdk-hnb659fds-container-assets-${AWS::AccountId}-us-east-1",
-          "imageTag": "d9e1feb275a216e0021518b10fd1bc8a89d54c424708e6bf76a2c114dd973ff6",
+          "imageTag": "5f1077b6daf7779a88306d46c3ac28280596196716d8124efb5a08ce51fe7247",
           "region": "us-east-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-image-publishing-role-${AWS::AccountId}-us-east-1"
         }

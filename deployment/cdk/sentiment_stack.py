@@ -13,7 +13,8 @@ from constructs import Construct
 from cdk_constructs import (
     SentimentLambdaConstruct,
     SentimentApiGatewayConstruct,
-    SentimentMonitoringConstruct
+    SentimentMonitoringConstruct,
+    SentimentFrontendConstruct
 )
 
 # Import configuration classes
@@ -25,6 +26,11 @@ from config import (
 )
 from config.api_config import RequestValidation, ApiSecurity
 from config.monitoring_config import AlarmConfig, DashboardConfig
+from config.frontend_config import (
+    get_frontend_config,
+    get_build_config,
+    get_deployment_config
+)
 
 # Import utilities
 from utils.common import get_tags, get_environment_config, merge_configs
@@ -48,12 +54,14 @@ class SentimentAnalysisStack(Stack):
         construct_id: str,
         environment: str = "prod",
         alarm_email: str = None,
+        deploy_frontend: bool = True,
         **kwargs
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
         
         self.env_name = environment
         self.alarm_email = alarm_email
+        self.deploy_frontend = deploy_frontend
         
         # Get environment-specific configuration
         env_config = get_environment_config(environment)
@@ -65,6 +73,10 @@ class SentimentAnalysisStack(Stack):
         self._create_lambda_construct()
         self._create_api_gateway_construct()
         self._create_monitoring_construct()
+        
+        # Create frontend construct (if enabled)
+        if self.deploy_frontend:
+            self._create_frontend_construct()
         
         # Create stack outputs
         self._create_outputs()
@@ -167,6 +179,25 @@ class SentimentAnalysisStack(Stack):
         else:
             self.monitoring_construct = None
     
+    def _create_frontend_construct(self) -> None:
+        """Create the frontend construct."""
+        # Get frontend configurations
+        frontend_config = get_frontend_config(self.env_name)
+        build_config = get_build_config(self.env_name)
+        deployment_config = get_deployment_config(self.env_name)
+        
+        # Create frontend construct
+        self.frontend_construct = SentimentFrontendConstruct(
+            self,
+            "FrontendConstruct",
+            api_url=self.api_gateway_construct.api_url,
+            api_key_id=self.api_gateway_construct.api_key_id,
+            frontend_config=frontend_config,
+            build_config=build_config,
+            deployment_config=deployment_config,
+            environment=self.env_name
+        )
+    
     def _create_outputs(self) -> None:
         """Create CloudFormation outputs."""
         
@@ -246,7 +277,36 @@ class SentimentAnalysisStack(Stack):
                     description="SNS Topic ARN for alerts"
                 )
         
+        # Frontend outputs (if deployed)
+        if self.deploy_frontend and hasattr(self, 'frontend_construct'):
+            cdk.CfnOutput(
+                self,
+                "FrontendUrl",
+                value=self.frontend_construct.website_url,
+                description="Frontend website URL",
+                export_name=f"SentimentAnalysis-{self.env_name}-FrontendUrl"
+            )
+            
+            cdk.CfnOutput(
+                self,
+                "FrontendBucket",
+                value=self.frontend_construct.bucket_name,
+                description="S3 bucket hosting the frontend",
+                export_name=f"SentimentAnalysis-{self.env_name}-FrontendBucket"
+            )
+            
+            if self.frontend_construct.distribution_id:
+                cdk.CfnOutput(
+                    self,
+                    "CloudFrontDistributionId",
+                    value=self.frontend_construct.distribution_id,
+                    description="CloudFront distribution ID",
+                    export_name=f"SentimentAnalysis-{self.env_name}-CloudFrontDistributionId"
+                )
+        
         # Usage instructions
+        frontend_url = self.frontend_construct.website_url if (self.deploy_frontend and hasattr(self, 'frontend_construct')) else "Frontend not deployed"
+        
         cdk.CfnOutput(
             self,
             "UsageInstructions",
@@ -255,8 +315,9 @@ Test your API:
 1. Get API key: aws apigateway get-api-key --api-key {self.api_gateway_construct.api_key_id} --include-value --query 'value' --output text
 2. Test health: curl {self.api_gateway_construct.health_endpoint_url}
 3. Test prediction: curl -X POST {self.api_gateway_construct.predict_endpoint_url} -H "Content-Type: application/json" -H "x-api-key: YOUR_API_KEY" -d '{{"text": "This movie was great!", "model": "both"}}'
+4. Frontend URL: {frontend_url}
             """.strip(),
-            description="Instructions for testing the deployed API"
+            description="Instructions for testing the deployed API and accessing the frontend"
         )
     
     def _add_stack_tags(self) -> None:

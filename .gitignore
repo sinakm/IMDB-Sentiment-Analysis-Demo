@@ -142,5 +142,51 @@ tmp/
 .cache/
 transformers_cache/
 
+# ModernBERT downloads (exclude from git but keep for deployment)
+deployment/lambda/models/modernbert/
+**/modernbert/
+download_manifest.json
+
+# Large model artifacts (keep small config files, exclude large model files)
+artifacts/*/model.pt
+deployment/lambda/models/*/model.pt
+# But keep config and vocab files
+!artifacts/*/config.json
+!artifacts/*/vocab.json
+!deployment/lambda/models/*/config.json
+!deployment/lambda/models/*/vocab.json
+
+# Node.js and React
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn/
+.pnp.*
+
+# React build output
+build/
+dist/
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
 # CDK stuff
 cdk.json
+cdk.out/
+*.asset.*
+
+# Frontend specific
+deployment/frontend/node_modules/
+deployment/frontend/build/
+deployment/frontend/.env.local
+deployment/frontend/.env.development.local
+deployment/frontend/.env.test.local
+deployment/frontend/.env.production.local
+
+
+#
