@@ -17,7 +17,7 @@ I have successfully implemented a comprehensive sentiment analysis challenge fea
 
 2. **LSTM with Pre-trained Embeddings** (`src/models/lstm_pretrained.py`)
 
-   - 250+ lines with GloVe integration
+   - 250+ lines with ModernBERT integration
    - Supports embedding fine-tuning or freezing
    - Advanced embedding analysis capabilities
    - Seamless pre-trained weight loading

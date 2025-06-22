@@ -446,6 +446,173 @@ def create_data_loaders(train_dataset,
     return train_loader, val_loader, test_loader
 
 
+def extract_verbalizer_embeddings(texts: List[str], 
+                                 labels: List[int],
+                                 max_samples: Optional[int] = None,
+                                 cache_file: str = "verbalizer_embeddings.pkl",
+                                 cache_dir: str = "./cache",
+                                 max_length: int = 256,
+                 verbalizer_template: str = " The sentiment of this statement is",
+                                 random_seed: int = 42) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Extract verbalizer embeddings from texts using ModernBERT.
+    
+    This function:
+    1. Limits dataset to max_samples (balanced positive/negative)
+    2. Adds verbalizer template to each text
+    3. Extracts last token embedding from ModernBERT
+    4. Saves embeddings to cache file
+    5. Returns embeddings and labels tensors
+    
+    Args:
+        texts: List of input texts
+        labels: List of labels
+        max_samples: Maximum number of samples (balanced)
+        cache_file: Cache file name
+        cache_dir: Cache directory
+        max_length: Maximum sequence length
+        verbalizer_template: Template to append to texts
+        random_seed: Random seed
+        
+    Returns:
+        Tuple of (embeddings, labels) tensors
+    """
+    import pickle
+    from transformers import AutoModel, AutoTokenizer
+    
+    # Create cache directory
+    os.makedirs(cache_dir, exist_ok=True)
+    cache_path = os.path.join(cache_dir, cache_file)
+    
+    # Check if embeddings are already cached
+    if os.path.exists(cache_path):
+        print(f"Loading cached embeddings from {cache_path}")
+        with open(cache_path, 'rb') as f:
+            data = pickle.load(f)
+            return data['embeddings'], data['labels']
+    
+    # Limit dataset if specified
+    if max_samples and max_samples < len(texts):
+        texts, labels = _limit_balanced_dataset(texts, labels, max_samples, random_seed)
+        print(f"Limited dataset to {len(texts):,} balanced samples")
+    
+    print(f"Extracting verbalizer embeddings for {len(texts):,} texts...")
+    
+    # Load ModernBERT
+    print("Loading ModernBERT model...")
+    model = AutoModel.from_pretrained("answerdotai/ModernBERT-base")
+    tokenizer = AutoTokenizer.from_pretrained("answerdotai/ModernBERT-base")
+    model.eval()
+    
+    # Move to GPU if available
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
+    print(f"Using device: {device}")
+    
+    # Extract embeddings
+    embeddings = []
+    batch_size = 32  # Process in batches to avoid memory issues
+    
+    for i in tqdm(range(0, len(texts), batch_size), desc="Extracting embeddings"):
+        batch_texts = texts[i:i + batch_size]
+        
+        # Add verbalizer template
+        verbalized_texts = [text + verbalizer_template for text in batch_texts]
+        
+        # Tokenize
+        encoding = tokenizer(
+            verbalized_texts,
+            max_length=max_length,
+            padding='max_length',
+            truncation=True,
+            return_tensors='pt'
+        )
+        
+        # Move to device
+        input_ids = encoding['input_ids'].to(device)
+        attention_mask = encoding['attention_mask'].to(device)
+        
+        # Extract embeddings
+        with torch.no_grad():
+            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+            last_hidden_state = outputs.last_hidden_state
+            
+            # Extract last meaningful token for each sequence
+            batch_embeddings = []
+            for j in range(last_hidden_state.size(0)):
+                # Find last non-padding token
+                last_pos = (attention_mask[j] == 1).nonzero(as_tuple=True)[0][-1].item()
+                batch_embeddings.append(last_hidden_state[j, last_pos].cpu())
+            
+            embeddings.extend(batch_embeddings)
+    
+    # Convert to tensors
+    embeddings = torch.stack(embeddings)
+    labels = torch.tensor(labels, dtype=torch.float32)
+    
+    print(f"✅ Extracted embeddings: {embeddings.shape}")
+    print(f"✅ Labels: {labels.shape}")
+    
+    # Save to cache
+    cache_data = {
+        'embeddings': embeddings,
+        'labels': labels,
+        'template': verbalizer_template,
+        'max_length': max_length,
+        'num_samples': len(texts)
+    }
+    
+    with open(cache_path, 'wb') as f:
+        pickle.dump(cache_data, f)
+    
+    print(f"💾 Cached embeddings to {cache_path}")
+    
+    return embeddings, labels
+
+
+def _limit_balanced_dataset(texts: List[str], 
+                           labels: List[int], 
+                           max_samples: int, 
+                           random_seed: int) -> Tuple[List[str], List[int]]:
+    """
+    Limit dataset to max_samples with balanced positive/negative samples.
+    
+    Args:
+        texts: List of texts
+        labels: List of labels
+        max_samples: Maximum number of samples
+        random_seed: Random seed
+        
+    Returns:
+        Tuple of (limited_texts, limited_labels)
+    """
+    import random
+    random.seed(random_seed)
+    
+    # Separate positive and negative samples
+    positive_indices = [i for i, label in enumerate(labels) if label == 1]
+    negative_indices = [i for i, label in enumerate(labels) if label == 0]
+    
+    # Calculate how many of each class to take
+    samples_per_class = max_samples // 2
+    
+    # Randomly sample from each class
+    selected_positive = random.sample(positive_indices, 
+                                    min(samples_per_class, len(positive_indices)))
+    selected_negative = random.sample(negative_indices, 
+                                    min(samples_per_class, len(negative_indices)))
+    
+    # Combine and shuffle
+    selected_indices = selected_positive + selected_negative
+    random.shuffle(selected_indices)
+    
+    # Extract selected samples
+    limited_texts = [texts[i] for i in selected_indices]
+    limited_labels = [labels[i] for i in selected_indices]
+    
+    return limited_texts, limited_labels
+
+
 def get_dataset_statistics(texts: List[str], labels: List[int]) -> Dict[str, Union[int, float]]:
     """
     Get dataset statistics.

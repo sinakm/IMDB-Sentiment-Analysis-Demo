@@ -1,0 +1,47 @@
+{
+  "version": "2.0.0",
+  "description": "LSTM vs Verbalizer sentiment analysis models",
+  "models": {
+    "lstm": {
+      "type": "pytorch_lstm",
+      "files": [
+        "model.pt",
+        "config.json",
+        "vocab.json"
+      ],
+      "memory_mb": 150,
+      "description": "Traditional LSTM with learned embeddings"
+    },
+    "verbalizer": {
+      "type": "pytorch_verbalizer",
+      "files": [
+        "model.pt",
+        "config.json"
+      ],
+      "memory_mb": 600,
+      "description": "Modern approach with pre-computed ModernBERT embeddings"
+    }
+  },
+  "total_memory_mb": 750,
+  "lambda_config": {
+    "memory": 2048,
+    "timeout": 300,
+    "runtime": "python3.9"
+  },
+  "api_endpoints": {
+    "predict": {
+      "method": "POST",
+      "path": "/predict",
+      "description": "Run sentiment analysis",
+      "parameters": {
+        "text": "string (required) - Text to analyze",
+        "model": "string (optional) - 'lstm', 'verbalizer', or 'both' (default)"
+      }
+    },
+    "health": {
+      "method": "GET",
+      "path": "/health",
+      "description": "Health check endpoint"
+    }
+  }
+}

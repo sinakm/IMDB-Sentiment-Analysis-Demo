@@ -135,72 +135,44 @@ class LSTMDataset(IMDBDataset):
 
 class VerbalizerDataset(IMDBDataset):
     """
-    Dataset for verbalizer/PET approach.
+    Simple dataset for verbalizer approach.
     
-    This dataset appends verbalizer templates to texts and uses transformer tokenization.
+    This dataset appends a single verbalizer template to texts and uses ModernBERT tokenization.
+    The model will extract the last token embedding for classification.
     """
     
     def __init__(self, 
                  texts: List[str],
                  labels: List[int],
-                 tokenizer_name: str = 'bert-base-uncased',
-                 max_length: int = 512,
-                 template_type: str = 'positive',
-                 use_both_templates: bool = False):
+                 tokenizer_name: str = 'answerdotai/ModernBERT-base',
+                 max_length: int = 512):
         """
-        Initialize verbalizer dataset.
+        Initialize simple verbalizer dataset.
         
         Args:
             texts: List of review texts
             labels: List of labels
-            tokenizer_name: Transformer tokenizer name
+            tokenizer_name: Transformer tokenizer name (ModernBERT)
             max_length: Maximum sequence length
-            template_type: Template type ('positive', 'negative')
-            use_both_templates: Whether to use both templates for comparison
         """
         super().__init__(texts, labels, max_length)
         
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
-        self.template_type = template_type
-        self.use_both_templates = use_both_templates
         
-        # Verbalizer templates
-        self.templates = {
-            'positive': " This statement is positive",
-            'negative': " This statement is negative"
-        }
-        
-        # Get verbalizer token IDs
-        self.positive_token_id = self.tokenizer.convert_tokens_to_ids("positive")
-        self.negative_token_id = self.tokenizer.convert_tokens_to_ids("negative")
+        # Simple verbalizer template (always the same)
+        self.verbalizer_template = " The sentiment of this statement is positive."
         
         # Pre-process data
         self._preprocess_data()
     
     def _preprocess_data(self):
-        """Pre-process all texts with verbalizer templates."""
-        print("Preprocessing texts for verbalizer dataset...")
+        """Pre-process all texts with verbalizer template."""
+        print("Preprocessing texts for simple verbalizer dataset...")
         
-        if self.use_both_templates:
-            # Process with both templates
-            self._process_both_templates()
-        else:
-            # Process with single template
-            self._process_single_template()
+        # Add template to all texts
+        verbalized_texts = [text + self.verbalizer_template for text in self.texts]
         
-        # Convert labels to tensor
-        self.label_tensor = torch.tensor(self.labels, dtype=torch.float)
-    
-    def _process_single_template(self):
-        """Process texts with single template."""
-        template = self.templates[self.template_type]
-        target_token_id = (self.positive_token_id if self.template_type == 'positive' 
-                          else self.negative_token_id)
-        
-        # Add template to texts
-        verbalized_texts = [text + template for text in self.texts]
-        
-        # Tokenize
+        # Tokenize all texts
         encoding = self.tokenizer(
             verbalized_texts,
             max_length=self.max_length,
@@ -212,82 +184,8 @@ class VerbalizerDataset(IMDBDataset):
         self.input_ids = encoding['input_ids']
         self.attention_masks = encoding['attention_mask']
         
-        # Find verbalizer token positions
-        self.verbalizer_positions = self._find_verbalizer_positions(
-            self.input_ids, target_token_id
-        )
-    
-    def _process_both_templates(self):
-        """Process texts with both templates for comparison."""
-        # Process positive template
-        pos_template = self.templates['positive']
-        pos_texts = [text + pos_template for text in self.texts]
-        
-        pos_encoding = self.tokenizer(
-            pos_texts,
-            max_length=self.max_length,
-            padding='max_length',
-            truncation=True,
-            return_tensors='pt'
-        )
-        
-        # Process negative template
-        neg_template = self.templates['negative']
-        neg_texts = [text + neg_template for text in self.texts]
-        
-        neg_encoding = self.tokenizer(
-            neg_texts,
-            max_length=self.max_length,
-            padding='max_length',
-            truncation=True,
-            return_tensors='pt'
-        )
-        
-        # Store both encodings
-        self.pos_input_ids = pos_encoding['input_ids']
-        self.pos_attention_masks = pos_encoding['attention_mask']
-        self.neg_input_ids = neg_encoding['input_ids']
-        self.neg_attention_masks = neg_encoding['attention_mask']
-        
-        # Find verbalizer positions
-        self.pos_verbalizer_positions = self._find_verbalizer_positions(
-            self.pos_input_ids, self.positive_token_id
-        )
-        self.neg_verbalizer_positions = self._find_verbalizer_positions(
-            self.neg_input_ids, self.negative_token_id
-        )
-    
-    def _find_verbalizer_positions(self, 
-                                 input_ids: torch.Tensor, 
-                                 target_token_id: int) -> torch.Tensor:
-        """
-        Find positions of verbalizer tokens.
-        
-        Args:
-            input_ids: Token IDs [batch_size, seq_len]
-            target_token_id: Target token ID to find
-            
-        Returns:
-            Positions of verbalizer tokens [batch_size]
-        """
-        positions = []
-        
-        for i, sequence in enumerate(input_ids):
-            # Find all positions of target token
-            token_positions = (sequence == target_token_id).nonzero(as_tuple=True)[0]
-            
-            if len(token_positions) > 0:
-                # Use the last occurrence (most likely from our template)
-                positions.append(token_positions[-1].item())
-            else:
-                # Fallback: use position before [SEP] or [PAD]
-                sep_positions = (sequence == self.tokenizer.sep_token_id).nonzero(as_tuple=True)[0]
-                if len(sep_positions) > 0:
-                    positions.append(sep_positions[0].item() - 1)
-                else:
-                    positions.append(self.max_length - 2)  # Before [PAD]
-        
-        return torch.tensor(positions)
+        # Convert labels to tensor
+        self.label_tensor = torch.tensor(self.labels, dtype=torch.float)
     
     def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
         """
@@ -297,46 +195,26 @@ class VerbalizerDataset(IMDBDataset):
             idx: Item index
             
         Returns:
-            Dictionary with model inputs
+            Dictionary with model inputs (compatible with new verbalizer model)
         """
-        if self.use_both_templates:
-            return {
-                'pos_input_ids': self.pos_input_ids[idx],
-                'pos_attention_mask': self.pos_attention_masks[idx],
-                'pos_verbalizer_positions': self.pos_verbalizer_positions[idx],
-                'neg_input_ids': self.neg_input_ids[idx],
-                'neg_attention_mask': self.neg_attention_masks[idx],
-                'neg_verbalizer_positions': self.neg_verbalizer_positions[idx],
-                'labels': self.label_tensor[idx]
-            }
-        else:
-            return {
-                'input_ids': self.input_ids[idx],
-                'attention_mask': self.attention_masks[idx],
-                'verbalizer_positions': self.verbalizer_positions[idx],
-                'labels': self.label_tensor[idx]
-            }
+        return {
+            'input_ids': self.input_ids[idx],
+            'attention_mask': self.attention_masks[idx],
+            'labels': self.label_tensor[idx]
+        }
     
     def get_verbalizer_statistics(self) -> Dict[str, Union[int, float]]:
         """Get verbalizer-specific statistics."""
-        if self.use_both_templates:
-            pos_positions = self.pos_verbalizer_positions.numpy()
-            neg_positions = self.neg_verbalizer_positions.numpy()
-            
-            return {
-                'avg_pos_verbalizer_position': float(np.mean(pos_positions)),
-                'avg_neg_verbalizer_position': float(np.mean(neg_positions)),
-                'pos_verbalizer_position_std': float(np.std(pos_positions)),
-                'neg_verbalizer_position_std': float(np.std(neg_positions))
-            }
-        else:
-            positions = self.verbalizer_positions.numpy()
-            return {
-                'avg_verbalizer_position': float(np.mean(positions)),
-                'verbalizer_position_std': float(np.std(positions)),
-                'min_verbalizer_position': int(np.min(positions)),
-                'max_verbalizer_position': int(np.max(positions))
-            }
+        # Calculate sequence lengths (non-padding tokens)
+        lengths = self.attention_masks.sum(dim=1).numpy()
+        
+        return {
+            'avg_sequence_length': float(np.mean(lengths)),
+            'min_sequence_length': int(np.min(lengths)),
+            'max_sequence_length': int(np.max(lengths)),
+            'std_sequence_length': float(np.std(lengths)),
+            'verbalizer_template': self.verbalizer_template
+        }
 
 
 class MultiModelDataset:
@@ -387,23 +265,16 @@ class MultiModelDataset:
             preprocessor=self.preprocessor
         )
         
-        # Verbalizer dataset
+        # Verbalizer dataset (simplified)
         self.verbalizer_dataset = VerbalizerDataset(
             texts=self.texts,
             labels=self.labels,
             tokenizer_name=self.tokenizer_name,
-            max_length=self.max_length,
-            template_type='positive'
+            max_length=self.max_length
         )
         
-        # Verbalizer dataset with both templates (for analysis)
-        self.verbalizer_both_dataset = VerbalizerDataset(
-            texts=self.texts,
-            labels=self.labels,
-            tokenizer_name=self.tokenizer_name,
-            max_length=self.max_length,
-            use_both_templates=True
-        )
+        # For backward compatibility, use same dataset
+        self.verbalizer_both_dataset = self.verbalizer_dataset
     
     def get_lstm_dataset(self) -> LSTMDataset:
         """Get LSTM dataset."""
@@ -474,7 +345,7 @@ class DatasetFactory:
                                  val_labels: List[int],
                                  test_texts: List[str],
                                  test_labels: List[int],
-                                 tokenizer_name: str = 'bert-base-uncased',
+                                 tokenizer_name: str = 'answerdotai/ModernBERT-base',
                                  max_length: int = 512,
                                  template_type: str = 'positive') -> Tuple[VerbalizerDataset, VerbalizerDataset, VerbalizerDataset]:
         """
@@ -483,9 +354,9 @@ class DatasetFactory:
         Returns:
             Tuple of (train_dataset, val_dataset, test_dataset)
         """
-        train_dataset = VerbalizerDataset(train_texts, train_labels, tokenizer_name, max_length, template_type)
-        val_dataset = VerbalizerDataset(val_texts, val_labels, tokenizer_name, max_length, template_type)
-        test_dataset = VerbalizerDataset(test_texts, test_labels, tokenizer_name, max_length, template_type)
+        train_dataset = VerbalizerDataset(train_texts, train_labels, tokenizer_name, max_length)
+        val_dataset = VerbalizerDataset(val_texts, val_labels, tokenizer_name, max_length)
+        test_dataset = VerbalizerDataset(test_texts, test_labels, tokenizer_name, max_length)
         
         return train_dataset, val_dataset, test_dataset
     

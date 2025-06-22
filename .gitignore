@@ -141,3 +141,6 @@ tmp/
 # Hugging Face cache
 .cache/
 transformers_cache/
+
+# CDK stuff
+cdk.json

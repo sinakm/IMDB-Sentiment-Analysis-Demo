@@ -1,35 +1,35 @@
-# IMDB Sentiment Analysis Demo
+# IMDB Sentiment Analysis: LSTM vs Verbalizer
 
-A comprehensive comparison of three different approaches to sentiment analysis on the IMDB movie reviews dataset.
+A focused comparison of two different approaches to sentiment analysis on the IMDB movie reviews dataset.
 
 ## 🎯 Overview
 
-This project implements and compares three different sentiment analysis approaches:
+This project implements and compares two fundamentally different sentiment analysis approaches:
 
-1. **Pure LSTM** - LSTM with learned embeddings from scratch (2.4M parameters)
-2. **ModernBERT** - State-of-the-art transformer model (149M parameters)
-3. **Verbalizer** - Template-based approach using BERT (109M parameters)
+1. **Pure LSTM** - Traditional approach with learned embeddings from scratch (~500K-1M parameters)
+2. **Verbalizer** - Modern approach using pre-computed ModernBERT embeddings (~239K parameters)
 
 ## 🏗️ Project Structure
 
 ```
-├── main.py                 # Main entry point with type hints
+├── main.py                 # Main entry point for comparison
+├── train_lstm_only.py      # Individual LSTM training
+├── train_verbalizer_only.py # Individual Verbalizer training
+├── compare_all_models.py   # Automated comparison pipeline
 ├── pyproject.toml          # Project dependencies
 ├── requirements.txt        # Alternative dependency file
 ├── .gitignore             # Git ignore rules
-├── INSTALLATION.md        # Setup instructions
-├── PROJECT_SUMMARY.md     # Detailed project overview
+├── TRAINING_GUIDE.md      # Detailed training instructions
 ├── problem_statement.md   # Original problem description
 ├── test_imports.py        # Import verification script
 ├── src/                   # Source code
 │   ├── data/              # Data handling modules
-│   │   ├── dataset.py     # PyTorch datasets
-│   │   ├── modernbert_dataset.py  # ModernBERT-specific dataset
+│   │   ├── dataset.py     # LSTM dataset
+│   │   ├── verbalizer_dataset.py  # Verbalizer dataset
 │   │   └── preprocessing.py       # Data preprocessing utilities
 │   ├── models/            # Model implementations
 │   │   ├── lstm_pure.py           # Pure LSTM classifier
-│   │   ├── modernbert_classifier.py  # ModernBERT classifier
-│   │   ├── verbalizer.py          # Template-based classifier
+│   │   ├── verbalizer.py          # Verbalizer classifier
 │   │   └── loss_functions.py      # Custom loss functions
 │   ├── training/          # Training infrastructure
 │   │   ├── trainer.py     # Training loops
@@ -37,6 +37,8 @@ This project implements and compares three different sentiment analysis approach
 │   └── utils/             # Utility functions
 │       ├── helpers.py     # General utilities
 │       └── config.py      # Configuration management
+├── deployment/            # AWS deployment (Docker Lambda + CDK)
+├── docs/                  # Documentation
 ├── notebooks/             # Jupyter notebooks (optional)
 ├── checkpoints/           # Model checkpoints (gitignored)
 ├── results/              # Training results (gitignored)
@@ -45,14 +47,7 @@ This project implements and compares three different sentiment analysis approach
 
 ## 🚀 Quick Start
 
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/sinakm/IMDB-Sentiment-Analysis-Demo.git
-cd IMDB-Sentiment-Analysis-Demo
-```
-
-### 2. Setup Environment
+### 1. Setup Environment
 
 ```bash
 # Create virtual environment
@@ -68,152 +63,182 @@ source .venv/bin/activate
 pip install -e .
 ```
 
-### 3. Verify Installation
+### 2. Verify Installation
 
 ```bash
 python test_imports.py
 ```
 
-### 4. Run Demo
+### 3. Run Quick Demo
 
 ```bash
-# Quick demo (trains only Pure LSTM)
+# Quick demo (LSTM only, small dataset)
 python main.py --mode demo
 
-# Compare all three models
+# Compare both models (recommended)
 python main.py --mode compare
 
-# Full training with analysis
-python main.py --mode full
+# Individual model training
+python train_lstm_only.py --max_samples 1000 --num_epochs 5
+python train_verbalizer_only.py --max_samples 1000 --num_epochs 5
 ```
 
 ## 📊 Usage Examples
 
-### Demo Mode (Quick Test)
+### Quick Comparison
 
 ```bash
-python main.py --mode demo
+# Automated comparison pipeline
+python compare_all_models.py --quick
 ```
 
-- Uses balanced subset of 1,000 training samples
-- Trains only Pure LSTM model
-- Shows verbalizer analysis examples
-- Takes ~2-3 minutes
+- Trains both models with 1K samples
+- Generates comparison table and insights
+- Takes ~5-10 minutes
 
-### Compare Mode (Full Comparison)
+### Full Comparison
 
 ```bash
-python main.py --mode compare
+# Full dataset comparison
+python compare_all_models.py --full
 ```
 
-- Trains all three models on full dataset
-- Generates comparison table
-- Saves results to `results/comparison_results.json`
-- Takes ~30-60 minutes depending on hardware
+- Trains both models on full IMDB dataset
+- Comprehensive evaluation and analysis
+- Takes ~30-60 minutes
 
-### Full Mode (Complete Analysis)
-
-```bash
-python main.py --mode full
-```
-
-- Trains all three models
-- Includes verbalizer analysis demo
-- Most comprehensive evaluation
-
-### Custom Parameters
+### Individual Model Training
 
 ```bash
-python main.py --mode compare \
-    --batch_size 32 \
-    --num_epochs 5 \
-    --learning_rate 0.001 \
-    --hidden_dim 256
+# Train LSTM only
+python train_lstm_only.py --num_epochs 10 --batch_size 32
+
+# Train Verbalizer only
+python train_verbalizer_only.py --max_samples 5000 --num_epochs 5
+
+# Quick testing
+python train_verbalizer_only.py --max_samples 100 --num_epochs 3
 ```
 
 ## 🎛️ Configuration Options
 
-| Parameter         | Default | Description                               |
-| ----------------- | ------- | ----------------------------------------- |
-| `--mode`          | `demo`  | Execution mode: `demo`, `compare`, `full` |
-| `--batch_size`    | `16`    | Training batch size                       |
-| `--num_epochs`    | `3`     | Number of training epochs                 |
-| `--learning_rate` | `0.001` | Learning rate for optimization            |
-| `--embed_dim`     | `200`   | Embedding dimension for LSTM              |
-| `--hidden_dim`    | `128`   | Hidden dimension for LSTM                 |
-| `--vocab_size`    | `20000` | Maximum vocabulary size                   |
-| `--max_length`    | `256`   | Maximum sequence length                   |
-| `--dropout`       | `0.3`   | Dropout probability                       |
+### Common Parameters
+
+| Parameter         | Default | Description                            |
+| ----------------- | ------- | -------------------------------------- |
+| `--batch_size`    | `32`    | Training batch size                    |
+| `--num_epochs`    | `5`     | Number of training epochs              |
+| `--learning_rate` | `0.001` | Learning rate for optimization         |
+| `--max_length`    | `256`   | Maximum sequence length                |
+| `--dropout`       | `0.3`   | Dropout probability                    |
+| `--max_samples`   | `None`  | Limit dataset size (for quick testing) |
+
+### LSTM-Specific Parameters
+
+| Parameter      | Default | Description             |
+| -------------- | ------- | ----------------------- |
+| `--embed_dim`  | `200`   | Embedding dimension     |
+| `--hidden_dim` | `128`   | Hidden dimension        |
+| `--num_layers` | `2`     | Number of LSTM layers   |
+| `--vocab_size` | `20000` | Maximum vocabulary size |
+
+### Verbalizer-Specific Parameters
+
+| Parameter      | Default | Description                 |
+| -------------- | ------- | --------------------------- |
+| `--hidden_dim` | `128`   | Classifier hidden dimension |
 
 ## 📈 Expected Results
 
-### Demo Mode Results
+### Quick Test (1K samples, 3-5 epochs)
 
 ```
-Pure LSTM:
-  Accuracy: ~66.0%
-  F1 Score: ~55.3%
-  Training Time: ~2 minutes
+Model          Accuracy    F1 Score    Time (min)    Parameters
+LSTM           ~70-75%     ~70-75%     ~3-5          ~500K-1M
+Verbalizer     ~68-75%     ~68-75%     ~0.5-1        ~239K
 ```
 
-### Full Comparison (Expected)
+### Full Dataset (25K training samples)
 
 ```
-Model          Accuracy    F1 Score    Time (min)
-Pure LSTM      ~75-80%     ~75-80%     ~5-10
-ModernBERT     ~88-92%     ~88-92%     ~20-40
-Verbalizer     ~85-90%     ~85-90%     ~15-30
+Model          Accuracy    F1 Score    Time (min)    Parameters
+LSTM           ~80-85%     ~80-85%     ~15-30        ~500K-1M
+Verbalizer     ~85-90%     ~85-90%     ~3-5          ~239K
 ```
 
 ## 🔧 Technical Details
 
-### Model Architectures
+### Model Comparison
 
-**Pure LSTM:**
+| Aspect               | LSTM                           | Verbalizer                     |
+| -------------------- | ------------------------------ | ------------------------------ |
+| **Approach**         | Learn everything from scratch  | Leverage pre-trained knowledge |
+| **Embeddings**       | Learned during training        | Pre-computed ModernBERT        |
+| **Architecture**     | Bidirectional LSTM + Attention | Deep feedforward classifier    |
+| **Training Speed**   | Slower (learns embeddings)     | Faster (pre-computed)          |
+| **Parameters**       | ~500K-1M                       | ~239K                          |
+| **Dependencies**     | Self-contained                 | Requires ModernBERT            |
+| **Interpretability** | Traditional, well-understood   | Modern transfer learning       |
 
-- Bidirectional LSTM with attention
-- Learned embeddings from scratch
-- Custom loss function with confidence penalty
+### LSTM Architecture
 
-**ModernBERT:**
+```python
+Embedding(vocab_size, embed_dim) →
+Bidirectional LSTM(hidden_dim, num_layers) →
+Attention Mechanism →
+Classifier(hidden_dim*2, 1)
+```
 
-- State-of-the-art transformer architecture
-- Pre-trained on large text corpus
-- Fine-tuned for sentiment classification
+### Verbalizer Architecture
 
-**Verbalizer:**
+```python
+Pre-computed ModernBERT embeddings →
+Linear(768, 256) → ReLU → BatchNorm → Dropout →
+Linear(256, 128) → ReLU → BatchNorm → Dropout →
+Linear(128, 64) → ReLU → Dropout →
+Linear(64, 1)
+```
 
-- Template-based approach using BERT
-- Uses natural language templates
-- Consistency scoring for predictions
+### Verbalizer Template
 
-### Dataset Information
+The verbalizer uses the template: `" The sentiment of this statement is"`
 
-- **Source**: IMDB Movie Reviews Dataset
-- **Size**: 50,000 training + 50,000 test reviews
-- **Balance**: 50% positive, 50% negative
-- **Preprocessing**: Automatic download and caching
+Example:
+
+- Input: `"This movie was fantastic!"`
+- Processed: `"This movie was fantastic! The sentiment of this statement is"`
+- ModernBERT extracts the final token embedding for classification
 
 ## 🛠️ Development
 
-### Adding New Models
+### Adding Custom Models
 
 1. Create model class in `src/models/`
 2. Implement required methods: `forward()`, `get_model_info()`
-3. Add to model creation in `main.py`
-4. Create appropriate dataset if needed
+3. Create training script following existing patterns
+4. Add to comparison pipeline
 
 ### Custom Loss Functions
 
-- Implement in `src/models/loss_functions.py`
-- Inherit from `nn.Module`
-- Add confidence penalties or length weighting
+```python
+# Example: Custom loss with confidence penalty
+class CustomLoss(nn.Module):
+    def __init__(self, confidence_penalty=2.0):
+        super().__init__()
+        self.confidence_penalty = confidence_penalty
+        self.bce = nn.BCEWithLogitsLoss()
 
-### Data Processing
+    def forward(self, logits, labels):
+        # Standard BCE loss
+        bce_loss = self.bce(logits, labels)
 
-- Custom preprocessors in `src/data/preprocessing.py`
-- Dataset classes in `src/data/dataset.py`
-- Support for different tokenization schemes
+        # Confidence penalty
+        probs = torch.sigmoid(logits)
+        confidence = torch.abs(probs - 0.5)
+        penalty = -self.confidence_penalty * confidence.mean()
+
+        return bce_loss + penalty
+```
 
 ## 📋 Requirements
 
@@ -223,8 +248,67 @@ Verbalizer     ~85-90%     ~85-90%     ~15-30
 - scikit-learn
 - tqdm
 - datasets
+- pandas (for comparison tables)
 
 See `pyproject.toml` for complete dependency list.
+
+## 🚀 Production Deployment
+
+This project includes a complete AWS deployment using Docker Lambda and CDK.
+
+### Quick Deployment
+
+```bash
+# 1. Train both models
+python compare_all_models.py --full
+
+# 2. Export for deployment
+python deployment/scripts/export_models.py
+
+# 3. Deploy with CDK
+cd deployment/cdk
+pip install -r requirements.txt
+cdk deploy
+```
+
+### What Gets Deployed
+
+- **AWS Lambda Function**: Docker container with both models
+- **API Gateway**: REST API with authentication
+- **CloudWatch**: Logging and monitoring
+
+### API Usage
+
+```bash
+curl -X POST https://your-api-url/predict \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your-api-key" \
+  -d '{"text": "This movie was fantastic!", "model": "verbalizer"}'
+```
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment instructions.
+
+## 🎯 Key Insights
+
+### When to Use LSTM
+
+- **Self-contained deployment** (no external model dependencies)
+- **Traditional approach** preferred
+- **Learning task-specific representations** from scratch
+- **Interpretable architecture** required
+
+### When to Use Verbalizer
+
+- **Fast training** required (5-10x speedup)
+- **Leveraging pre-trained knowledge** preferred
+- **Fewer parameters** needed
+- **Modern transfer learning** approach acceptable
+
+### Performance Trade-offs
+
+- **Verbalizer**: Faster training, fewer parameters, leverages pre-trained knowledge
+- **LSTM**: Self-contained, learns task-specific representations, traditional approach
+- **Both**: Achieve similar accuracy (~80-90% on IMDB)
 
 ## 🤝 Contributing
 
@@ -247,9 +331,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📞 Contact
 
-- GitHub: [@sinakm](https://github.com/sinakm)
 - Repository: [IMDB-Sentiment-Analysis-Demo](https://github.com/sinakm/IMDB-Sentiment-Analysis-Demo)
 
 ---
 
-**Note**: This project demonstrates modern NLP techniques and is intended for educational and research purposes.
+**Note**: This project demonstrates the comparison between traditional and modern NLP approaches for educational and research purposes.

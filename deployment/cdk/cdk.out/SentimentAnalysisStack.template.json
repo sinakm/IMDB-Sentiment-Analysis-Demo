@@ -1,0 +1,1886 @@
+{
+ "Description": "Sentiment Analysis API with LSTM, ModernBERT, and Verbalizer models",
+ "Resources": {
+  "LambdaConstructExecutionRole0DD1E121": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Description": "Execution role for sentiment analysis Lambda function",
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ],
+    "RoleName": "sentiment-analysis-lambda-role-prod",
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/LambdaConstruct/ExecutionRole/Resource"
+   }
+  },
+  "LambdaConstructExecutionRoleDefaultPolicy31F9FBD4": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "tag:GetResources",
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "LambdaConstructExecutionRoleDefaultPolicy31F9FBD4",
+    "Roles": [
+     {
+      "Ref": "LambdaConstructExecutionRole0DD1E121"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/LambdaConstruct/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "LambdaConstructLogGroup3DEBA95C": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/aws/lambda/sentiment-analysis",
+    "RetentionInDays": 7,
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/LambdaConstruct/LogGroup/Resource"
+   }
+  },
+  "LambdaConstructFunction651B616A": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Architectures": [
+     "x86_64"
+    ],
+    "Code": {
+     "ImageUri": {
+      "Fn::Sub": "${AWS::AccountId}.dkr.ecr.us-east-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-${AWS::AccountId}-us-east-1:d9e1feb275a216e0021518b10fd1bc8a89d54c424708e6bf76a2c114dd973ff6"
+     }
+    },
+    "Description": "Sentiment analysis using LSTM and Verbalizer models",
+    "Environment": {
+     "Variables": {
+      "PYTHONPATH": "/var/task",
+      "MODEL_PATH": "/var/task/models",
+      "LOG_LEVEL": "INFO",
+      "ENVIRONMENT": "prod",
+      "TAG_PROJECT": "sentiment-analysis",
+      "TAG_ENVIRONMENT": "prod",
+      "TAG_OWNER": "ml-team",
+      "TAG_MANAGEDBY": "CDK",
+      "TAG_SERVICE": "sentiment-analysis-api",
+      "TAG_RESOURCETYPE": "Lambda-Function",
+      "TAG_MODELTYPES": "LSTM,Verbalizer"
+     }
+    },
+    "FunctionName": "sentiment-analysis-function-prod",
+    "LoggingConfig": {
+     "LogGroup": {
+      "Ref": "LambdaConstructLogGroup3DEBA95C"
+     }
+    },
+    "MemorySize": 2048,
+    "PackageType": "Image",
+    "Role": {
+     "Fn::GetAtt": [
+      "LambdaConstructExecutionRole0DD1E121",
+      "Arn"
+     ]
+    },
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ],
+    "Timeout": 300
+   },
+   "DependsOn": [
+    "LambdaConstructExecutionRoleDefaultPolicy31F9FBD4",
+    "LambdaConstructExecutionRole0DD1E121"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/LambdaConstruct/Function/Resource",
+    "aws:asset:path": "asset.d9e1feb275a216e0021518b10fd1bc8a89d54c424708e6bf76a2c114dd973ff6",
+    "aws:asset:dockerfile-path": "Dockerfile",
+    "aws:asset:docker-build-args": {
+     "BUILDPLATFORM": "linux/amd64"
+    },
+    "aws:asset:property": "Code.ImageUri"
+   }
+  },
+  "ApiGatewayConstructRestApi5BCF74CD": {
+   "Type": "AWS::ApiGateway::RestApi",
+   "Properties": {
+    "Description": "API for sentiment analysis using multiple ML models",
+    "EndpointConfiguration": {
+     "Types": [
+      "REGIONAL"
+     ]
+    },
+    "Name": "sentiment-analysis-api-prod",
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApiCloudWatchRole6F277622": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "apigateway.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+       ]
+      ]
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/CloudWatchRole/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApiAccount7C618E08": {
+   "Type": "AWS::ApiGateway::Account",
+   "Properties": {
+    "CloudWatchRoleArn": {
+     "Fn::GetAtt": [
+      "ApiGatewayConstructRestApiCloudWatchRole6F277622",
+      "Arn"
+     ]
+    }
+   },
+   "DependsOn": [
+    "ApiGatewayConstructRestApi5BCF74CD"
+   ],
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Account"
+   }
+  },
+  "ApiGatewayConstructRestApiDeploymentD0BFA00F73354163feaddffed2fae1b096902734": {
+   "Type": "AWS::ApiGateway::Deployment",
+   "Properties": {
+    "Description": "API for sentiment analysis using multiple ML models",
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    }
+   },
+   "DependsOn": [
+    "ApiGatewayConstructRestApihealthGET91EAB4C0",
+    "ApiGatewayConstructRestApihealthOPTIONSAF9460C7",
+    "ApiGatewayConstructRestApihealth991E6141",
+    "ApiGatewayConstructRestApiOPTIONSE0452EE5",
+    "ApiGatewayConstructRestApipredictOPTIONSE566FBA5",
+    "ApiGatewayConstructRestApipredictPOSTB233EA2A",
+    "ApiGatewayConstructRestApipredictC8BF3EAA",
+    "ApiGatewayConstructRestApiErrorResponseModel84BFC13C",
+    "ApiGatewayConstructRestApiPredictRequestModel0AE65827",
+    "ApiGatewayConstructRestApiRequestValidator353D0C6D",
+    "ApiGatewayConstructRestApiSuccessResponseModel874B7DE1"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Deployment/Resource",
+    "aws:cdk:do-not-refactor": true
+   }
+  },
+  "ApiGatewayConstructRestApiDeploymentStageprod15911FDB": {
+   "Type": "AWS::ApiGateway::Stage",
+   "Properties": {
+    "DeploymentId": {
+     "Ref": "ApiGatewayConstructRestApiDeploymentD0BFA00F73354163feaddffed2fae1b096902734"
+    },
+    "MethodSettings": [
+     {
+      "DataTraceEnabled": true,
+      "HttpMethod": "*",
+      "LoggingLevel": "INFO",
+      "MetricsEnabled": true,
+      "ResourcePath": "/*",
+      "ThrottlingBurstLimit": 200,
+      "ThrottlingRateLimit": 100
+     }
+    ],
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    },
+    "StageName": "prod",
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ]
+   },
+   "DependsOn": [
+    "ApiGatewayConstructRestApiAccount7C618E08"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/DeploymentStage.prod/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApiOPTIONSE0452EE5": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Fn::GetAtt": [
+      "ApiGatewayConstructRestApi5BCF74CD",
+      "RootResourceId"
+     ]
+    },
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/OPTIONS/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApipredictC8BF3EAA": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "ApiGatewayConstructRestApi5BCF74CD",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "predict",
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/predict/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApipredictOPTIONSE566FBA5": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ApiGatewayConstructRestApipredictC8BF3EAA"
+    },
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/predict/OPTIONS/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApipredictPOSTApiPermissionSentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9POSTpredictCAAFF0E2": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LambdaConstructFunction651B616A",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+       },
+       "/",
+       {
+        "Ref": "ApiGatewayConstructRestApiDeploymentStageprod15911FDB"
+       },
+       "/POST/predict"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/predict/POST/ApiPermission.SentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9.POST..predict"
+   }
+  },
+  "ApiGatewayConstructRestApipredictPOSTApiPermissionTestSentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9POSTpredict2D111FE6": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LambdaConstructFunction651B616A",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+       },
+       "/test-invoke-stage/POST/predict"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/predict/POST/ApiPermission.Test.SentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9.POST..predict"
+   }
+  },
+  "ApiGatewayConstructRestApipredictPOSTB233EA2A": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": true,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "POST",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "IntegrationResponses": [
+      {
+       "ResponseTemplates": {
+        "application/json": ""
+       },
+       "StatusCode": "200"
+      },
+      {
+       "ResponseTemplates": {
+        "application/json": "{\"error\": \"Bad Request\"}"
+       },
+       "SelectionPattern": ".*Bad Request.*",
+       "StatusCode": "400"
+      },
+      {
+       "ResponseTemplates": {
+        "application/json": "{\"error\": \"Internal Server Error\"}"
+       },
+       "SelectionPattern": ".*Internal Server Error.*",
+       "StatusCode": "500"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{\"statusCode\": \"200\"}"
+     },
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "LambdaConstructFunction651B616A",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "MethodResponses": [
+     {
+      "ResponseModels": {
+       "application/json": {
+        "Ref": "ApiGatewayConstructRestApiSuccessResponseModel874B7DE1"
+       }
+      },
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "200"
+     },
+     {
+      "ResponseModels": {
+       "application/json": {
+        "Ref": "ApiGatewayConstructRestApiErrorResponseModel84BFC13C"
+       }
+      },
+      "StatusCode": "400"
+     },
+     {
+      "ResponseModels": {
+       "application/json": {
+        "Ref": "ApiGatewayConstructRestApiErrorResponseModel84BFC13C"
+       }
+      },
+      "StatusCode": "500"
+     }
+    ],
+    "RequestModels": {
+     "application/json": {
+      "Ref": "ApiGatewayConstructRestApiPredictRequestModel0AE65827"
+     }
+    },
+    "RequestValidatorId": {
+     "Ref": "ApiGatewayConstructRestApiRequestValidator353D0C6D"
+    },
+    "ResourceId": {
+     "Ref": "ApiGatewayConstructRestApipredictC8BF3EAA"
+    },
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/predict/POST/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApihealth991E6141": {
+   "Type": "AWS::ApiGateway::Resource",
+   "Properties": {
+    "ParentId": {
+     "Fn::GetAtt": [
+      "ApiGatewayConstructRestApi5BCF74CD",
+      "RootResourceId"
+     ]
+    },
+    "PathPart": "health",
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/health/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApihealthOPTIONSAF9460C7": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "OPTIONS",
+    "Integration": {
+     "IntegrationResponses": [
+      {
+       "ResponseParameters": {
+        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Origin": "'*'",
+        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
+       },
+       "StatusCode": "204"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{ statusCode: 200 }"
+     },
+     "Type": "MOCK"
+    },
+    "MethodResponses": [
+     {
+      "ResponseParameters": {
+       "method.response.header.Access-Control-Allow-Headers": true,
+       "method.response.header.Access-Control-Allow-Origin": true,
+       "method.response.header.Access-Control-Allow-Methods": true
+      },
+      "StatusCode": "204"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ApiGatewayConstructRestApihealth991E6141"
+    },
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/health/OPTIONS/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApihealthGETApiPermissionSentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9GEThealth419AFFC0": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LambdaConstructFunction651B616A",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+       },
+       "/",
+       {
+        "Ref": "ApiGatewayConstructRestApiDeploymentStageprod15911FDB"
+       },
+       "/GET/health"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/health/GET/ApiPermission.SentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9.GET..health"
+   }
+  },
+  "ApiGatewayConstructRestApihealthGETApiPermissionTestSentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9GEThealth8BF5E6ED": {
+   "Type": "AWS::Lambda::Permission",
+   "Properties": {
+    "Action": "lambda:InvokeFunction",
+    "FunctionName": {
+     "Fn::GetAtt": [
+      "LambdaConstructFunction651B616A",
+      "Arn"
+     ]
+    },
+    "Principal": "apigateway.amazonaws.com",
+    "SourceArn": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:aws:execute-api:us-east-1:",
+       {
+        "Ref": "AWS::AccountId"
+       },
+       ":",
+       {
+        "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+       },
+       "/test-invoke-stage/GET/health"
+      ]
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/health/GET/ApiPermission.Test.SentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9.GET..health"
+   }
+  },
+  "ApiGatewayConstructRestApihealthGET91EAB4C0": {
+   "Type": "AWS::ApiGateway::Method",
+   "Properties": {
+    "ApiKeyRequired": false,
+    "AuthorizationType": "NONE",
+    "HttpMethod": "GET",
+    "Integration": {
+     "IntegrationHttpMethod": "POST",
+     "IntegrationResponses": [
+      {
+       "ResponseTemplates": {
+        "application/json": ""
+       },
+       "StatusCode": "200"
+      },
+      {
+       "ResponseTemplates": {
+        "application/json": "{\"error\": \"Bad Request\"}"
+       },
+       "SelectionPattern": ".*Bad Request.*",
+       "StatusCode": "400"
+      },
+      {
+       "ResponseTemplates": {
+        "application/json": "{\"error\": \"Internal Server Error\"}"
+       },
+       "SelectionPattern": ".*Internal Server Error.*",
+       "StatusCode": "500"
+      }
+     ],
+     "RequestTemplates": {
+      "application/json": "{\"statusCode\": \"200\"}"
+     },
+     "Type": "AWS_PROXY",
+     "Uri": {
+      "Fn::Join": [
+       "",
+       [
+        "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/",
+        {
+         "Fn::GetAtt": [
+          "LambdaConstructFunction651B616A",
+          "Arn"
+         ]
+        },
+        "/invocations"
+       ]
+      ]
+     }
+    },
+    "MethodResponses": [
+     {
+      "ResponseModels": {
+       "application/json": "Empty"
+      },
+      "StatusCode": "200"
+     },
+     {
+      "ResponseModels": {
+       "application/json": {
+        "Ref": "ApiGatewayConstructRestApiErrorResponseModel84BFC13C"
+       }
+      },
+      "StatusCode": "503"
+     }
+    ],
+    "ResourceId": {
+     "Ref": "ApiGatewayConstructRestApihealth991E6141"
+    },
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/health/GET/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApiPredictRequestModel0AE65827": {
+   "Type": "AWS::ApiGateway::Model",
+   "Properties": {
+    "ContentType": "application/json",
+    "Name": "PredictRequest",
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    },
+    "Schema": {
+     "additionalProperties": false,
+     "properties": {
+      "text": {
+       "description": "Text to analyze for sentiment",
+       "maxLength": 5000,
+       "minLength": 1,
+       "type": "string"
+      },
+      "model": {
+       "description": "Model to use for analysis",
+       "enum": [
+        "lstm",
+        "verbalizer",
+        "both"
+       ],
+       "type": "string"
+      }
+     },
+     "required": [
+      "text"
+     ],
+     "$schema": "http://json-schema.org/draft-04/schema#",
+     "title": "Predict Request",
+     "type": "object"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/PredictRequestModel/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApiSuccessResponseModel874B7DE1": {
+   "Type": "AWS::ApiGateway::Model",
+   "Properties": {
+    "ContentType": "application/json",
+    "Name": "SuccessResponse",
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    },
+    "Schema": {
+     "properties": {
+      "text": {
+       "type": "string"
+      },
+      "predictions": {
+       "type": "object"
+      },
+      "consensus": {
+       "type": "object"
+      },
+      "total_processing_time_ms": {
+       "type": "number"
+      },
+      "models_available": {
+       "type": "number"
+      },
+      "version": {
+       "type": "string"
+      }
+     },
+     "$schema": "http://json-schema.org/draft-04/schema#",
+     "title": "Success Response",
+     "type": "object"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/SuccessResponseModel/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApiErrorResponseModel84BFC13C": {
+   "Type": "AWS::ApiGateway::Model",
+   "Properties": {
+    "ContentType": "application/json",
+    "Name": "ErrorResponse",
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    },
+    "Schema": {
+     "properties": {
+      "error": {
+       "type": "string"
+      },
+      "message": {
+       "type": "string"
+      },
+      "request_id": {
+       "type": "string"
+      }
+     },
+     "$schema": "http://json-schema.org/draft-04/schema#",
+     "title": "Error Response",
+     "type": "object"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/ErrorResponseModel/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApiRequestValidator353D0C6D": {
+   "Type": "AWS::ApiGateway::RequestValidator",
+   "Properties": {
+    "RestApiId": {
+     "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+    },
+    "ValidateRequestBody": true,
+    "ValidateRequestParameters": true
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/RequestValidator/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApiApiKey69F04C6C": {
+   "Type": "AWS::ApiGateway::ApiKey",
+   "Properties": {
+    "Description": "API key for sentiment analysis service",
+    "Enabled": true,
+    "Name": "sentiment-analysis-api-key-prod",
+    "StageKeys": [
+     {
+      "RestApiId": {
+       "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+      },
+      "StageName": {
+       "Ref": "ApiGatewayConstructRestApiDeploymentStageprod15911FDB"
+      }
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/ApiKey/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApiUsagePlanA38B8389": {
+   "Type": "AWS::ApiGateway::UsagePlan",
+   "Properties": {
+    "ApiStages": [
+     {
+      "ApiId": {
+       "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+      },
+      "Stage": {
+       "Ref": "ApiGatewayConstructRestApiDeploymentStageprod15911FDB"
+      },
+      "Throttle": {}
+     }
+    ],
+    "Description": "Usage plan for Sentiment Analysis API",
+    "Quota": {
+     "Limit": 10000,
+     "Period": "MONTH"
+    },
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ],
+    "Throttle": {
+     "BurstLimit": 200,
+     "RateLimit": 100
+    },
+    "UsagePlanName": "sentiment-analysis-usage-plan-prod"
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/UsagePlan/Resource"
+   }
+  },
+  "ApiGatewayConstructRestApiUsagePlanUsagePlanKeyResourceSentimentAnalysisStackApiGatewayConstructRestApiApiKey02E4207F85EAB081": {
+   "Type": "AWS::ApiGateway::UsagePlanKey",
+   "Properties": {
+    "KeyId": {
+     "Ref": "ApiGatewayConstructRestApiApiKey69F04C6C"
+    },
+    "KeyType": "API_KEY",
+    "UsagePlanId": {
+     "Ref": "ApiGatewayConstructRestApiUsagePlanA38B8389"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/ApiGatewayConstruct/RestApi/UsagePlan/UsagePlanKeyResource:SentimentAnalysisStackApiGatewayConstructRestApiApiKey02E4207F"
+   }
+  },
+  "MonitoringConstructAlarmErrorRate70D4AB7A": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmDescription": "High error rate in sentiment analysis function",
+    "AlarmName": "sentiment-analysis-alarm-errorrate-prod",
+    "ComparisonOperator": "GreaterThanThreshold",
+    "DatapointsToAlarm": 2,
+    "Dimensions": [
+     {
+      "Name": "FunctionName",
+      "Value": {
+       "Ref": "LambdaConstructFunction651B616A"
+      }
+     }
+    ],
+    "EvaluationPeriods": 2,
+    "MetricName": "Errors",
+    "Namespace": "AWS/Lambda",
+    "Period": 300,
+    "Statistic": "Sum",
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ],
+    "Threshold": 5,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/MonitoringConstruct/AlarmErrorRate/Resource"
+   }
+  },
+  "MonitoringConstructAlarmDurationB9C8C4E2": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmDescription": "High execution duration in sentiment analysis function",
+    "AlarmName": "sentiment-analysis-alarm-duration-prod",
+    "ComparisonOperator": "GreaterThanThreshold",
+    "DatapointsToAlarm": 2,
+    "Dimensions": [
+     {
+      "Name": "FunctionName",
+      "Value": {
+       "Ref": "LambdaConstructFunction651B616A"
+      }
+     }
+    ],
+    "EvaluationPeriods": 3,
+    "MetricName": "Duration",
+    "Namespace": "AWS/Lambda",
+    "Period": 300,
+    "Statistic": "Average",
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ],
+    "Threshold": 30000,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/MonitoringConstruct/AlarmDuration/Resource"
+   }
+  },
+  "MonitoringConstructAlarmThrottles3A9F8382": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmDescription": "Function throttling detected",
+    "AlarmName": "sentiment-analysis-alarm-throttles-prod",
+    "ComparisonOperator": "GreaterThanOrEqualToThreshold",
+    "DatapointsToAlarm": 1,
+    "Dimensions": [
+     {
+      "Name": "FunctionName",
+      "Value": {
+       "Ref": "LambdaConstructFunction651B616A"
+      }
+     }
+    ],
+    "EvaluationPeriods": 1,
+    "MetricName": "Throttles",
+    "Namespace": "AWS/Lambda",
+    "Period": 300,
+    "Statistic": "Sum",
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ],
+    "Threshold": 1,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/MonitoringConstruct/AlarmThrottles/Resource"
+   }
+  },
+  "MonitoringConstructApi4XXErrorAlarmDF4BBF28": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmDescription": "High 4XX error rate in API Gateway",
+    "AlarmName": "sentiment-analysis-alarm-api-4xx-prod",
+    "ComparisonOperator": "GreaterThanThreshold",
+    "DatapointsToAlarm": 2,
+    "Dimensions": [
+     {
+      "Name": "ApiName",
+      "Value": "sentiment-analysis-api-prod"
+     }
+    ],
+    "EvaluationPeriods": 2,
+    "MetricName": "4XXError",
+    "Namespace": "AWS/ApiGateway",
+    "Period": 300,
+    "Statistic": "Sum",
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ],
+    "Threshold": 10,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/MonitoringConstruct/Api4XXErrorAlarm/Resource"
+   }
+  },
+  "MonitoringConstructApi5XXErrorAlarm96DB23E6": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmDescription": "High 5XX error rate in API Gateway",
+    "AlarmName": "sentiment-analysis-alarm-api-5xx-prod",
+    "ComparisonOperator": "GreaterThanThreshold",
+    "DatapointsToAlarm": 1,
+    "Dimensions": [
+     {
+      "Name": "ApiName",
+      "Value": "sentiment-analysis-api-prod"
+     }
+    ],
+    "EvaluationPeriods": 1,
+    "MetricName": "5XXError",
+    "Namespace": "AWS/ApiGateway",
+    "Period": 300,
+    "Statistic": "Sum",
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ],
+    "Threshold": 5,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/MonitoringConstruct/Api5XXErrorAlarm/Resource"
+   }
+  },
+  "MonitoringConstructApiLatencyAlarm8CE2EC7F": {
+   "Type": "AWS::CloudWatch::Alarm",
+   "Properties": {
+    "AlarmDescription": "High latency in API Gateway",
+    "AlarmName": "sentiment-analysis-alarm-api-latency-prod",
+    "ComparisonOperator": "GreaterThanThreshold",
+    "DatapointsToAlarm": 2,
+    "Dimensions": [
+     {
+      "Name": "ApiName",
+      "Value": "sentiment-analysis-api-prod"
+     }
+    ],
+    "EvaluationPeriods": 3,
+    "MetricName": "Latency",
+    "Namespace": "AWS/ApiGateway",
+    "Period": 300,
+    "Statistic": "Average",
+    "Tags": [
+     {
+      "Key": "DeploymentMethod",
+      "Value": "CDK"
+     },
+     {
+      "Key": "Environment",
+      "Value": "prod"
+     },
+     {
+      "Key": "ManagedBy",
+      "Value": "CDK"
+     },
+     {
+      "Key": "ModelTypes",
+      "Value": "LSTM,Verbalizer"
+     },
+     {
+      "Key": "Owner",
+      "Value": "ml-team"
+     },
+     {
+      "Key": "Project",
+      "Value": "sentiment-analysis"
+     },
+     {
+      "Key": "Service",
+      "Value": "sentiment-analysis-api"
+     },
+     {
+      "Key": "StackName",
+      "Value": "SentimentAnalysisStack"
+     }
+    ],
+    "Threshold": 10000,
+    "TreatMissingData": "notBreaching"
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/MonitoringConstruct/ApiLatencyAlarm/Resource"
+   }
+  },
+  "MonitoringConstructDashboard77F744AF": {
+   "Type": "AWS::CloudWatch::Dashboard",
+   "Properties": {
+    "DashboardBody": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"widgets\":[{\"type\":\"metric\",\"width\":12,\"height\":6,\"x\":0,\"y\":0,\"properties\":{\"view\":\"timeSeries\",\"title\":\"Lambda Function Metrics\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"AWS/Lambda\",\"Invocations\",\"FunctionName\",\"",
+       {
+        "Ref": "LambdaConstructFunction651B616A"
+       },
+       "\",{\"stat\":\"Sum\"}],[\"AWS/Lambda\",\"Errors\",\"FunctionName\",\"",
+       {
+        "Ref": "LambdaConstructFunction651B616A"
+       },
+       "\",{\"stat\":\"Sum\"}],[\"AWS/Lambda\",\"Throttles\",\"FunctionName\",\"",
+       {
+        "Ref": "LambdaConstructFunction651B616A"
+       },
+       "\",{\"stat\":\"Sum\"}],[\"AWS/Lambda\",\"Duration\",\"FunctionName\",\"",
+       {
+        "Ref": "LambdaConstructFunction651B616A"
+       },
+       "\",{\"yAxis\":\"right\"}]],\"yAxis\":{}}},{\"type\":\"metric\",\"width\":12,\"height\":6,\"x\":12,\"y\":0,\"properties\":{\"view\":\"timeSeries\",\"title\":\"API Gateway Metrics\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"AWS/ApiGateway\",\"Count\",\"ApiName\",\"sentiment-analysis-api-prod\",{\"stat\":\"SampleCount\"}],[\"AWS/ApiGateway\",\"4XXError\",\"ApiName\",\"sentiment-analysis-api-prod\",{\"stat\":\"Sum\"}],[\"AWS/ApiGateway\",\"5XXError\",\"ApiName\",\"sentiment-analysis-api-prod\",{\"stat\":\"Sum\"}],[\"AWS/ApiGateway\",\"Latency\",\"ApiName\",\"sentiment-analysis-api-prod\",{\"yAxis\":\"right\"}]],\"yAxis\":{}}},{\"type\":\"metric\",\"width\":12,\"height\":6,\"x\":0,\"y\":6,\"properties\":{\"view\":\"timeSeries\",\"title\":\"Custom Application Metrics\",\"region\":\"",
+       {
+        "Ref": "AWS::Region"
+       },
+       "\",\"metrics\":[[\"SentimentAnalysis\",\"ModelInferenceTime\"],[\"SentimentAnalysis\",\"ModelAccuracy\"],[\"SentimentAnalysis\",\"RequestSize\"]],\"yAxis\":{}}},{\"type\":\"alarm\",\"width\":24,\"height\":4,\"x\":0,\"y\":12,\"properties\":{\"title\":\"Alarm Status\",\"alarms\":[\"",
+       {
+        "Fn::GetAtt": [
+         "MonitoringConstructAlarmErrorRate70D4AB7A",
+         "Arn"
+        ]
+       },
+       "\",\"",
+       {
+        "Fn::GetAtt": [
+         "MonitoringConstructAlarmDurationB9C8C4E2",
+         "Arn"
+        ]
+       },
+       "\",\"",
+       {
+        "Fn::GetAtt": [
+         "MonitoringConstructAlarmThrottles3A9F8382",
+         "Arn"
+        ]
+       },
+       "\",\"",
+       {
+        "Fn::GetAtt": [
+         "MonitoringConstructApi4XXErrorAlarmDF4BBF28",
+         "Arn"
+        ]
+       },
+       "\",\"",
+       {
+        "Fn::GetAtt": [
+         "MonitoringConstructApi5XXErrorAlarm96DB23E6",
+         "Arn"
+        ]
+       },
+       "\",\"",
+       {
+        "Fn::GetAtt": [
+         "MonitoringConstructApiLatencyAlarm8CE2EC7F",
+         "Arn"
+        ]
+       },
+       "\"]}}]}"
+      ]
+     ]
+    },
+    "DashboardName": "sentiment-analysis-dashboard-prod"
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/MonitoringConstruct/Dashboard/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/22QTU/DMAyGf8vuWRjlxLEwgRBMVEVwnbzUtGFpXfKhqar633HSjU2IUx77dezXzmS2yuRqAQe3VNV+afROjm8e1F5wajtqaOVYkkFx/9mltyCj1RDDmSZhqHZyfKH60VLoo3Ji1qDdVSDHNak92qcWanwInfKaulh4yQXaVjvH0SRQ2S04h97Ji595zERNltiT057scAcOBfS6Bo8HGNgsOp/3Ovk9Y64Uhc6LNfaGhhYZOXsR8c51WnIG/krBKkztN+gbqqJ4pJN6HDLzhio0qShBid+B53+A0RWw07n2T47dPWM65pHeHU8vDKSL/B9w2SSUoVAdwKtGjrkB26YeCdbgmh2BTYZ/g2k6u053jHvqro5Fr8H3wU+iGHi77upGXmfydvHltF5aPppuUZbz+wPTWb8hLwIAAA=="
+   },
+   "Metadata": {
+    "aws:cdk:path": "SentimentAnalysisStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "ApiGatewayConstructRestApiEndpointB786B18F": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "ApiGatewayConstructRestApiDeploymentStageprod15911FDB"
+      },
+      "/"
+     ]
+    ]
+   }
+  },
+  "ApiUrl": {
+   "Description": "API Gateway URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "ApiGatewayConstructRestApiDeploymentStageprod15911FDB"
+      },
+      "/"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "SentimentAnalysis-prod-ApiUrl"
+   }
+  },
+  "PredictEndpoint": {
+   "Description": "Prediction endpoint URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "ApiGatewayConstructRestApiDeploymentStageprod15911FDB"
+      },
+      "/predict"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "SentimentAnalysis-prod-PredictEndpoint"
+   }
+  },
+  "HealthEndpoint": {
+   "Description": "Health check endpoint URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "ApiGatewayConstructRestApiDeploymentStageprod15911FDB"
+      },
+      "/health"
+     ]
+    ]
+   },
+   "Export": {
+    "Name": "SentimentAnalysis-prod-HealthEndpoint"
+   }
+  },
+  "ApiKeyId": {
+   "Description": "API Key ID (use AWS CLI to get the actual key value)",
+   "Value": {
+    "Ref": "ApiGatewayConstructRestApiApiKey69F04C6C"
+   },
+   "Export": {
+    "Name": "SentimentAnalysis-prod-ApiKeyId"
+   }
+  },
+  "ApiKeyCommand": {
+   "Description": "Command to retrieve API key value",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "aws apigateway get-api-key --api-key ",
+      {
+       "Ref": "ApiGatewayConstructRestApiApiKey69F04C6C"
+      },
+      " --include-value --query 'value' --output text"
+     ]
+    ]
+   }
+  },
+  "LambdaFunctionName": {
+   "Description": "Lambda function name",
+   "Value": {
+    "Ref": "LambdaConstructFunction651B616A"
+   },
+   "Export": {
+    "Name": "SentimentAnalysis-prod-LambdaFunctionName"
+   }
+  },
+  "LambdaFunctionArn": {
+   "Description": "Lambda function ARN",
+   "Value": {
+    "Fn::GetAtt": [
+     "LambdaConstructFunction651B616A",
+     "Arn"
+    ]
+   },
+   "Export": {
+    "Name": "SentimentAnalysis-prod-LambdaFunctionArn"
+   }
+  },
+  "DashboardUrl": {
+   "Description": "CloudWatch Dashboard URL",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://console.aws.amazon.com/cloudwatch/home?region=us-east-1#dashboards:name=",
+      {
+       "Ref": "MonitoringConstructDashboard77F744AF"
+      }
+     ]
+    ]
+   }
+  },
+  "UsageInstructions": {
+   "Description": "Instructions for testing the deployed API",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "Test your API:\n1. Get API key: aws apigateway get-api-key --api-key ",
+      {
+       "Ref": "ApiGatewayConstructRestApiApiKey69F04C6C"
+      },
+      " --include-value --query 'value' --output text\n2. Test health: curl https://",
+      {
+       "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "ApiGatewayConstructRestApiDeploymentStageprod15911FDB"
+      },
+      "/health\n3. Test prediction: curl -X POST https://",
+      {
+       "Ref": "ApiGatewayConstructRestApi5BCF74CD"
+      },
+      ".execute-api.us-east-1.",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "ApiGatewayConstructRestApiDeploymentStageprod15911FDB"
+      },
+      "/predict -H \"Content-Type: application/json\" -H \"x-api-key: YOUR_API_KEY\" -d '{\"text\": \"This movie was great!\", \"model\": \"both\"}'"
+     ]
+    ]
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}
