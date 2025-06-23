@@ -24,7 +24,7 @@ This guide covers deploying the complete sentiment analysis application includin
 
 ```bash
 cd buildops/deployment/scripts
-python deploy_with_frontend.py --environment prod --email your@email.com
+python deploy_separated_stacks.py --environment prod --email your@email.com
 ```
 
 ### Option 2: Manual CDK Deployment
@@ -38,8 +38,11 @@ pip install -r requirements.txt
 # Bootstrap CDK (first time only)
 cdk bootstrap
 
-# Deploy with frontend
-cdk deploy --require-approval never -c environment=prod -c deploy_frontend=true
+# Deploy API stack first
+cdk deploy SentimentAnalysisStack-prod --app "python app_with_frontend.py" --require-approval never
+
+# Deploy Frontend stack second
+cdk deploy SentimentAnalysisFrontendStack-prod --app "python app_with_frontend.py" --require-approval never
 ```
 
 ## 📋 Prerequisites
@@ -149,7 +152,7 @@ ls -la buildops/artifacts/verbalizer/
 
 ```bash
 cd buildops/deployment/scripts
-python deploy_with_frontend.py --environment prod
+python deploy_separated_stacks.py --environment prod
 ```
 
 The script will:
@@ -157,8 +160,9 @@ The script will:
 1. ✅ Check prerequisites
 2. 📦 Install dependencies
 3. 🚀 Bootstrap CDK
-4. 🏗️ Deploy infrastructure
-5. 📋 Display outputs
+4. 🏗️ Deploy API stack (Lambda + API Gateway)
+5. 🌐 Deploy Frontend stack (React + S3 + CloudFront)
+6. 📋 Display outputs
 
 ### Step 3: Verify Deployment
 

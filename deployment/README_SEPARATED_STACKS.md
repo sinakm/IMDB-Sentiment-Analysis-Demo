@@ -1,6 +1,10 @@
 # Separated Stack Deployment Guide
 
-This guide explains the new separated stack architecture for the Sentiment Analysis application, which resolves the deployment issues you were experiencing.
+This guide explains the separated stack architecture for the Sentiment Analysis application with runtime configuration.
+
+## 🌟 [**Live Demo**](https://d354nm7rm3934r.cloudfront.net/)
+
+See the deployed application in action!
 
 ## Architecture Overview
 
@@ -15,19 +19,19 @@ The application is now deployed using **two separate CDK stacks**:
 
 ### 2. Frontend Stack (`SentimentAnalysisFrontendStack`)
 
-- **React Application** built with API configuration
+- **React Application** with runtime configuration
 - **S3 Bucket** for static hosting
 - **CloudFront Distribution** for global CDN
-- **Build-time configuration** (no custom resources needed)
+- **Runtime Configuration**: Dynamic API key injection via custom resource
 
 ## Benefits of Separated Stacks
 
-✅ **Eliminates Custom Resource Issues**: No more complex Lambda functions for runtime configuration  
+✅ **Runtime Configuration**: API keys injected at deployment time, not build time  
 ✅ **Independent Deployments**: Update frontend without touching API infrastructure  
 ✅ **Cleaner Dependencies**: Frontend imports API details via CloudFormation exports  
 ✅ **Better Error Isolation**: Issues in one stack don't affect the other  
 ✅ **Faster Iterations**: Frontend changes deploy quickly  
-✅ **Simplified Architecture**: Each stack has a single, clear responsibility
+✅ **CORS Support**: Proper CORS headers for all API responses (200, 400, 500)
 
 ## Deployment Options
 
@@ -95,27 +99,42 @@ python ../scripts/deploy_separated_stacks.py --environment prod
 ### 2. Frontend Stack Deployment
 
 1. **Imports** API URL and API Key ID from API stack
-2. Builds React app with API configuration at build time
+2. Builds React app without API configuration
 3. Deploys to S3 and CloudFront
-4. No custom resources or runtime configuration needed
+4. **Creates runtime configuration** via custom resource Lambda
 
-### 3. Build-Time Configuration
+### 3. Runtime Configuration
 
-The frontend gets API details injected during the Docker build process:
+The frontend gets API details injected at deployment time via `env.js`:
 
-```bash
-REACT_APP_API_URL=https://api-gateway-url.com/prod
-REACT_APP_API_KEY_ID=your-api-key-id
+```javascript
+window.__ENV__ = {
+  API_URL: "https://api-gateway-url.com/prod",
+  API_KEY_ID: "actual-api-key-value", // Retrieved dynamically
+  ENVIRONMENT: "prod",
+};
 ```
+
+The custom resource Lambda:
+
+- Retrieves the actual API key value (not just ID)
+- Creates `env.js` file with runtime configuration
+- Uploads to S3 with no-cache headers
 
 ## Key Changes Made
 
-### 1. Simplified Frontend Construct
+### 1. Runtime Configuration Approach
 
-- Removed complex custom resource Lambda function
-- Uses build-time environment variables instead
+- Custom resource Lambda retrieves actual API key value
+- Frontend uses `window.__ENV__` instead of `process.env`
+- API key value injected at deployment time, not build time
 - Updated to Node 20 (from Node 18)
-- Cleaner error handling
+
+### 2. CORS Fixes
+
+- Added CORS headers to all API Gateway method responses (200, 400, 500)
+- Fixed integration response headers
+- Proper error handling with CORS support
 
 ### 2. Stack Separation
 

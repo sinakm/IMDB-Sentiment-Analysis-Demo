@@ -2,6 +2,10 @@
 
 A focused comparison of two different approaches to sentiment analysis on the IMDB movie reviews dataset.
 
+## 🌟 [**Live Demo**](https://d354nm7rm3934r.cloudfront.net/)
+
+Try the deployed sentiment analysis application with both LSTM and Verbalizer models!
+
 ## 🎯 Overview
 
 This project implements and compares two fundamentally different sentiment analysis approaches:
@@ -254,7 +258,13 @@ See `pyproject.toml` for complete dependency list.
 
 ## 🚀 Production Deployment
 
-This project includes a complete AWS deployment using Docker Lambda and CDK.
+This project includes a complete AWS deployment with separated backend and frontend stacks.
+
+### Architecture
+
+- **Backend Stack**: AWS Lambda (Docker) + API Gateway + CloudWatch
+- **Frontend Stack**: React SPA + S3 + CloudFront + Runtime Configuration
+- **Separated Deployment**: Independent scaling and updates
 
 ### Quick Deployment
 
@@ -265,26 +275,52 @@ python compare_all_models.py --full
 # 2. Export for deployment
 python deployment/scripts/export_models.py
 
-# 3. Deploy with CDK
+# 3. Deploy both stacks
 cd deployment/cdk
 pip install -r requirements.txt
-cdk deploy
+
+# Deploy API stack first
+cdk deploy SentimentAnalysisStack-prod --app "python app_with_frontend.py"
+
+# Deploy Frontend stack second
+cdk deploy SentimentAnalysisFrontendStack-prod --app "python app_with_frontend.py"
 ```
 
 ### What Gets Deployed
 
-- **AWS Lambda Function**: Docker container with both models
-- **API Gateway**: REST API with authentication
-- **CloudWatch**: Logging and monitoring
+#### Backend Stack
+
+- **AWS Lambda Function**: Docker container with both LSTM and Verbalizer models
+- **API Gateway**: REST API with API key authentication and CORS
+- **CloudWatch**: Comprehensive logging and monitoring
+
+#### Frontend Stack
+
+- **React Application**: Modern SPA with Material-UI components
+- **S3 Bucket**: Static website hosting
+- **CloudFront**: Global CDN with caching and security headers
+- **Runtime Configuration**: Dynamic API key injection
 
 ### API Usage
 
 ```bash
+# Health check
+curl https://your-api-url/health
+
+# Sentiment analysis
 curl -X POST https://your-api-url/predict \
   -H "Content-Type: application/json" \
   -H "x-api-key: your-api-key" \
-  -d '{"text": "This movie was fantastic!", "model": "verbalizer"}'
+  -d '{"text": "This movie was fantastic!", "model": "both"}'
 ```
+
+### Frontend Features
+
+- **Interactive UI**: Real-time sentiment analysis with visual gauges
+- **Model Selection**: Choose between LSTM, Verbalizer, or both models
+- **Confidence Visualization**: Circular progress indicators with sentiment icons
+- **Responsive Design**: Works on desktop and mobile devices
+- **Error Handling**: Graceful error messages and loading states
 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for detailed deployment instructions.
 
