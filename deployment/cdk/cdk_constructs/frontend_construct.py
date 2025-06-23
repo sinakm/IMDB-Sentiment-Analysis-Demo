@@ -19,8 +19,7 @@ from aws_cdk import (
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
     aws_s3_deployment as s3deploy,
-    aws_iam as iam,
-    custom_resources as cr
+    aws_iam as iam
 )
 from constructs import Construct
 
@@ -166,10 +165,7 @@ class SentimentFrontendConstruct(Construct):
             self,
             "FrontendDistribution",
             default_behavior=cloudfront.BehaviorOptions(
-                origin=origins.S3Origin(
-                    self.bucket,
-                    origin_access_identity=self.oai
-                ),
+                origin=origins.S3BucketOrigin.with_origin_access_control(self.bucket),
                 allowed_methods=cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
                 cached_methods=cloudfront.CachedMethods.CACHE_GET_HEAD_OPTIONS,
                 compress=self.frontend_config.enable_compression,
@@ -180,10 +176,7 @@ class SentimentFrontendConstruct(Construct):
             ),
             additional_behaviors={
                 "/static/*": cloudfront.BehaviorOptions(
-                    origin=origins.S3Origin(
-                        self.bucket,
-                        origin_access_identity=self.oai
-                    ),
+                    origin=origins.S3BucketOrigin.with_origin_access_control(self.bucket),
                     allowed_methods=cloudfront.AllowedMethods.ALLOW_GET_HEAD,
                     cached_methods=cloudfront.CachedMethods.CACHE_GET_HEAD,
                     compress=True,
@@ -206,7 +199,7 @@ class SentimentFrontendConstruct(Construct):
                     ttl=cdk.Duration.minutes(5)
                 )
             ],
-            price_class=getattr(cloudfront.PriceClass, self.frontend_config.price_class),
+            price_class=cloudfront.PriceClass.PRICE_CLASS_100,
             enabled=True,
             comment=f"Sentiment Analysis Frontend - {self.environment}"
         )
@@ -219,71 +212,37 @@ class SentimentFrontendConstruct(Construct):
     def _deploy_to_s3(self) -> None:
         """Deploy the built React app to S3."""
         
-        # Create a custom resource to build and deploy
-        build_and_deploy = cr.AwsCustomResource(
-            self,
-            "BuildAndDeploy",
-            on_create=cr.AwsSdkCall(
-                service="Lambda",
-                action="invoke",
-                parameters={
-                    "FunctionName": self._create_build_function().function_name,
-                    "Payload": cdk.Fn.to_json_string({
-                        "bucketName": self.bucket.bucket_name,
-                        "frontendDir": str(self.frontend_dir),
-                        "buildEnv": self.build_env,
-                        "distributionId": self.distribution.distribution_id if hasattr(self, 'distribution') else None
-                    })
-                },
-                physical_resource_id=cr.PhysicalResourceId.of("BuildAndDeploy")
-            ),
-            on_update=cr.AwsSdkCall(
-                service="Lambda",
-                action="invoke",
-                parameters={
-                    "FunctionName": self._create_build_function().function_name,
-                    "Payload": cdk.Fn.to_json_string({
-                        "bucketName": self.bucket.bucket_name,
-                        "frontendDir": str(self.frontend_dir),
-                        "buildEnv": self.build_env,
-                        "distributionId": self.distribution.distribution_id if hasattr(self, 'distribution') else None
-                    })
-                },
-                physical_resource_id=cr.PhysicalResourceId.of("BuildAndDeploy")
-            ),
-            policy=cr.AwsCustomResourcePolicy.from_statements([
-                iam.PolicyStatement(
-                    actions=["lambda:InvokeFunction"],
-                    resources=[self._create_build_function().function_arn]
-                )
-            ])
-        )
-        
-        # Ensure deployment happens after distribution is created
-        if hasattr(self, 'distribution'):
-            build_and_deploy.node.add_dependency(self.distribution)
-    
-    def _create_build_function(self):
-        """Create a Lambda function to build and deploy the React app."""
-        # This would be a more complex implementation in a real scenario
-        # For now, we'll use a simpler S3 deployment approach
-        
-        # Use S3 deployment construct instead
-        env_exports = ' && '.join([f'export {k}="{v}"' for k, v in self.build_env.items()])
+        # Use S3 deployment construct with Docker bundling
+        # Only include essential environment variables to avoid shell issues
+        essential_env = {
+            "NODE_ENV": "production",
+            "GENERATE_SOURCEMAP": "false",
+            "REACT_APP_API_URL": self.api_url,
+            "REACT_APP_API_KEY_ID": self.api_key_id
+        }
         
         self.deployment = s3deploy.BucketDeployment(
             self,
             "FrontendDeployment",
             sources=[s3deploy.Source.asset(
                 str(self.frontend_dir),
+                exclude=[
+                    "node_modules",
+                    "build",
+                    ".git",
+                    "*.log",
+                    ".env*",
+                    "coverage"
+                ],
                 bundling=cdk.BundlingOptions(
                     image=cdk.DockerImage.from_registry("node:18-alpine"),
+                    environment=essential_env,
                     command=[
                         "sh", "-c",
-                        f"""
+                        """
                         cd /asset-input &&
-                        npm ci &&
-                        {env_exports} &&
+                        npm cache clean --force &&
+                        npm install &&
                         npm run build &&
                         cp -r build/* /asset-output/
                         """
@@ -295,7 +254,9 @@ class SentimentFrontendConstruct(Construct):
             distribution_paths=self.deployment_config.invalidation_paths if self.deployment_config.invalidate_cache_on_deploy else None
         )
         
-        return None  # Not using Lambda function approach
+        # Ensure deployment happens after distribution is created
+        if hasattr(self, 'distribution'):
+            self.deployment.node.add_dependency(self.distribution)
     
     def _setup_monitoring(self) -> None:
         """Set up monitoring for the frontend."""

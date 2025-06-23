@@ -28,7 +28,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/f3105591dd91d52cf2e119fa2deb0f3798e857a96721c3448e3c0a2512f996c0.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/1748469df75e57f689e550bb26cd737538967bb36a124bb78187c1db01d414da.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -319,6 +319,82 @@
             "data": "MonitoringConstructDashboard77F744AF"
           }
         ],
+        "/SentimentAnalysisStack/FrontendConstruct/FrontendBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendConstructFrontendBucketEA061DFC"
+          }
+        ],
+        "/SentimentAnalysisStack/FrontendConstruct/FrontendBucket/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendConstructFrontendBucketPolicyA88520BE"
+          }
+        ],
+        "/SentimentAnalysisStack/FrontendConstruct/FrontendOAI/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendConstructFrontendOAI3A349E81"
+          }
+        ],
+        "/SentimentAnalysisStack/FrontendConstruct/FrontendDistribution/Origin1/S3OriginAccessControl/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendConstructFrontendDistributionOrigin1S3OriginAccessControlD5F33C8B"
+          }
+        ],
+        "/SentimentAnalysisStack/FrontendConstruct/FrontendDistribution/Origin2/S3OriginAccessControl/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendConstructFrontendDistributionOrigin2S3OriginAccessControl433BF098"
+          }
+        ],
+        "/SentimentAnalysisStack/FrontendConstruct/FrontendDistribution/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendConstructFrontendDistribution37614C4A"
+          }
+        ],
+        "/SentimentAnalysisStack/FrontendConstruct/FrontendDeployment/AwsCliLayer/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendConstructFrontendDeploymentAwsCliLayer14BFEDB4"
+          }
+        ],
+        "/SentimentAnalysisStack/FrontendConstruct/FrontendDeployment/CustomResource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendConstructFrontendDeploymentCustomResourceAD7BDFF1"
+          }
+        ],
+        "/SentimentAnalysisStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C": [
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 2
+          }
+        ],
+        "/SentimentAnalysisStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+          }
+        ],
+        "/SentimentAnalysisStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF"
+          }
+        ],
+        "/SentimentAnalysisStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536"
+          }
+        ],
         "/SentimentAnalysisStack/ApiUrl": [
           {
             "type": "aws:cdk:logicalId",
@@ -365,6 +441,24 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "DashboardUrl"
+          }
+        ],
+        "/SentimentAnalysisStack/FrontendUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendUrl"
+          }
+        ],
+        "/SentimentAnalysisStack/FrontendBucket": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendBucket"
+          }
+        ],
+        "/SentimentAnalysisStack/CloudFrontDistributionId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CloudFrontDistributionId"
           }
         ],
         "/SentimentAnalysisStack/UsageInstructions": [
