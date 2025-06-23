@@ -1,7 +1,7 @@
 {
   "version": "44.0.0",
   "files": {
-    "e63494432f7fa1cda11526868606c0c23c9277378b5e924bdf2b5a873a630356": {
+    "cbeb0b3cc3398972538ed46b2db97d4144313672482f8995021f62304116730d": {
       "displayName": "SentimentAnalysisStack Template",
       "source": {
         "path": "SentimentAnalysisStack.template.json",
@@ -10,7 +10,7 @@
       "destinations": {
         "current_account-us-east-1": {
           "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
-          "objectKey": "e63494432f7fa1cda11526868606c0c23c9277378b5e924bdf2b5a873a630356.json",
+          "objectKey": "cbeb0b3cc3398972538ed46b2db97d4144313672482f8995021f62304116730d.json",
           "region": "us-east-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
         }

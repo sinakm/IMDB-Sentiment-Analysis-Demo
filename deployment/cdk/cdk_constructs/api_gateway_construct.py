@@ -94,6 +94,11 @@ class SentimentApiGatewayConstruct(Construct):
                     status_code="200",
                     response_templates={
                         "application/json": ""
+                    },
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": "'*'",
+                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
                     }
                 ),
                 apigateway.IntegrationResponse(
@@ -101,6 +106,11 @@ class SentimentApiGatewayConstruct(Construct):
                     selection_pattern=".*Bad Request.*",
                     response_templates={
                         "application/json": '{"error": "Bad Request"}'
+                    },
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": "'*'",
+                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
                     }
                 ),
                 apigateway.IntegrationResponse(
@@ -108,6 +118,11 @@ class SentimentApiGatewayConstruct(Construct):
                     selection_pattern=".*Internal Server Error.*",
                     response_templates={
                         "application/json": '{"error": "Internal Server Error"}'
+                    },
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": "'*'",
+                        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,OPTIONS'"
                     }
                 )
             ],
@@ -219,12 +234,22 @@ class SentimentApiGatewayConstruct(Construct):
                     status_code="400",
                     response_models={
                         "application/json": self.error_response_model
+                    },
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Methods": True
                     }
                 ),
                 apigateway.MethodResponse(
                     status_code="500",
                     response_models={
                         "application/json": self.error_response_model
+                    },
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Methods": True
                     }
                 )
             ]
@@ -241,12 +266,22 @@ class SentimentApiGatewayConstruct(Construct):
                     status_code="200",
                     response_models={
                         "application/json": apigateway.Model.EMPTY_MODEL
+                    },
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Methods": True
                     }
                 ),
                 apigateway.MethodResponse(
                     status_code="503",
                     response_models={
                         "application/json": self.error_response_model
+                    },
+                    response_parameters={
+                        "method.response.header.Access-Control-Allow-Origin": True,
+                        "method.response.header.Access-Control-Allow-Headers": True,
+                        "method.response.header.Access-Control-Allow-Methods": True
                     }
                 )
             ]

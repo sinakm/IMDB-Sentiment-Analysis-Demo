@@ -1,8 +1,19 @@
 import axios from "axios";
 import { SentimentRequest, SentimentResponse } from "../types/sentiment";
 
-// API configuration - loaded from build-time environment variables
+// API configuration - loaded from runtime environment variables (window.__ENV__)
 const getApiConfig = () => {
+  // Check if runtime config is available
+  const runtimeEnv = (window as any).__ENV__;
+
+  if (runtimeEnv) {
+    return {
+      baseUrl: runtimeEnv.API_URL || "https://api.placeholder.com/",
+      apiKey: runtimeEnv.API_KEY_ID || "placeholder-key-id",
+    };
+  }
+
+  // Fallback to build-time environment variables (for local development)
   return {
     baseUrl: process.env.REACT_APP_API_URL || "https://api.placeholder.com/",
     apiKey: process.env.REACT_APP_API_KEY_ID || "placeholder-key-id",

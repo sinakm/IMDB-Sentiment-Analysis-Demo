@@ -12,6 +12,7 @@ No custom resources needed - all configuration is done at build time.
 
 import os
 import time
+import json
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -20,7 +21,10 @@ from aws_cdk import (
     aws_s3 as s3,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
-    aws_s3_deployment as s3deploy
+    aws_s3_deployment as s3deploy,
+    aws_lambda as lambda_,
+    aws_iam as iam,
+    custom_resources as cr
 )
 from constructs import Construct
 
@@ -176,7 +180,7 @@ class SimplifiedSentimentFrontendConstruct(Construct):
         cdk.Tags.of(self.distribution).add("Component", "cdn")
     
     def _deploy_to_s3(self) -> None:
-        """Deploy the built React app to S3 with API configuration."""
+        """Deploy the built React app to S3 with runtime configuration."""
         
         # Get the frontend source directory
         frontend_dir = Path(__file__).parent.parent / self.frontend_config.source_directory
@@ -184,64 +188,219 @@ class SimplifiedSentimentFrontendConstruct(Construct):
         if not frontend_dir.exists():
             raise ValueError(f"Frontend directory not found: {frontend_dir}")
         
-        # Prepare build environment with API configuration
+        # Prepare build environment WITHOUT API configuration (build-time only)
         build_env = {
             **self.build_config.build_environment,
-            "REACT_APP_API_URL": self.api_url,
-            "REACT_APP_API_KEY_ID": self.api_key_id,
             **self.frontend_config.environment_variables
         }
         
         print(f"Frontend will be built from: {frontend_dir}")
         print(f"API URL will be: {self.api_url}")
         
-        # Deploy with build-time configuration
+        # Deploy with runtime configuration using a custom resource approach
         self.deployment = s3deploy.BucketDeployment(
             self,
             "FrontendDeployment",
-            sources=[s3deploy.Source.asset(
-                str(frontend_dir),
-                exclude=[
-                    "node_modules",
-                    "build",
-                    ".git",
-                    "*.log",
-                    ".env.local",
-                    ".env.development.local", 
-                    ".env.test.local",
-                    "coverage",
-                    ".DS_Store"
-                ],
-                bundling=cdk.BundlingOptions(
-                    image=cdk.DockerImage.from_registry("node:20-alpine"),  # Updated to Node 20
-                    environment=build_env,
-                    command=[
-                        "sh", "-c",
-                        """
-                        cd /asset-input &&
-                        echo "Installing dependencies..." &&
-                        rm -rf node_modules/.cache || true &&
-                        rm -rf node_modules || true &&
-                        npm install &&
-                        echo "Building React application..." &&
-                        echo "API URL: $REACT_APP_API_URL" &&
-                        echo "API Key ID: $REACT_APP_API_KEY_ID" &&
-                        npm run build &&
-                        echo "Build completed successfully" &&
-                        cp -r build/* /asset-output/
-                        """
+            sources=[
+                # Build and deploy the React app
+                s3deploy.Source.asset(
+                    str(frontend_dir),
+                    exclude=[
+                        "node_modules",
+                        "build",
+                        ".git",
+                        "*.log",
+                        ".env.local",
+                        ".env.development.local", 
+                        ".env.test.local",
+                        "coverage",
+                        ".DS_Store"
                     ],
-                    user="root"
+                    bundling=cdk.BundlingOptions(
+                        image=cdk.DockerImage.from_registry("node:20-alpine"),
+                        environment=build_env,
+                        command=[
+                            "sh", "-c",
+                            """
+                            cd /asset-input &&
+                            echo "Installing dependencies..." &&
+                            rm -rf node_modules/.cache || true &&
+                            rm -rf node_modules || true &&
+                            npm install &&
+                            echo "Building React application (without API config)..." &&
+                            npm run build &&
+                            echo "Build completed successfully" &&
+                            cp -r build/* /asset-output/
+                            """
+                        ],
+                        user="root"
+                    )
                 )
-            )],
+            ],
             destination_bucket=self.bucket,
             distribution=self.distribution if hasattr(self, 'distribution') else None,
             distribution_paths=self.deployment_config.invalidation_paths if self.deployment_config.invalidate_cache_on_deploy else None
         )
         
+        # Create runtime configuration file separately using a custom resource
+        self._create_runtime_config()
+        
         # Ensure deployment happens after distribution is created
         if hasattr(self, 'distribution'):
             self.deployment.node.add_dependency(self.distribution)
+    
+    def _create_runtime_config(self) -> None:
+        """Create runtime configuration file using a custom resource."""
+        
+        # Create Lambda function for the custom resource
+        config_lambda = lambda_.Function(
+            self,
+            "ConfigUpdater",
+            runtime=lambda_.Runtime.PYTHON_3_9,
+            handler="index.handler",
+            code=lambda_.Code.from_inline("""
+import boto3
+import json
+import urllib3
+
+def handler(event, context):
+    print(f"Event: {json.dumps(event)}")
+    
+    try:
+        s3 = boto3.client('s3')
+        apigateway = boto3.client('apigateway')
+        
+        bucket_name = event['ResourceProperties']['BucketName']
+        api_url = event['ResourceProperties']['ApiUrl']
+        api_key_id = event['ResourceProperties']['ApiKeyId']
+        environment = event['ResourceProperties']['Environment']
+        
+        # Get the actual API key value from API Gateway
+        try:
+            api_key_response = apigateway.get_api_key(
+                apiKey=api_key_id,
+                includeValue=True
+            )
+            api_key_value = api_key_response['value']
+            print(f"Retrieved API key value for ID: {api_key_id}")
+        except Exception as e:
+            print(f"Error retrieving API key: {e}")
+            api_key_value = api_key_id  # Fallback to ID if retrieval fails
+        
+        # Create the runtime configuration content with actual API key value
+        config_content = f'''window.__ENV__ = {{
+  API_URL: '{api_url}',
+  API_KEY_ID: '{api_key_value}',
+  ENVIRONMENT: '{environment}'
+}};'''
+        
+        if event['RequestType'] in ['Create', 'Update']:
+            # Upload the configuration file to S3
+            s3.put_object(
+                Bucket=bucket_name,
+                Key='env.js',
+                Body=config_content,
+                ContentType='application/javascript',
+                CacheControl='no-cache'
+            )
+            print(f"Successfully uploaded env.js to {bucket_name}")
+        
+        elif event['RequestType'] == 'Delete':
+            # Delete the configuration file
+            try:
+                s3.delete_object(Bucket=bucket_name, Key='env.js')
+                print(f"Successfully deleted env.js from {bucket_name}")
+            except Exception as e:
+                print(f"Error deleting env.js: {e}")
+        
+        # Send success response
+        send_response(event, context, 'SUCCESS', {})
+        
+    except Exception as e:
+        print(f"Error: {e}")
+        send_response(event, context, 'FAILED', {})
+
+def send_response(event, context, status, data):
+    response_body = {
+        'Status': status,
+        'Reason': f'See CloudWatch Log Stream: {context.log_stream_name}',
+        'PhysicalResourceId': context.log_stream_name,
+        'StackId': event['StackId'],
+        'RequestId': event['RequestId'],
+        'LogicalResourceId': event['LogicalResourceId'],
+        'Data': data
+    }
+    
+    http = urllib3.PoolManager()
+    response = http.request(
+        'PUT',
+        event['ResponseURL'],
+        body=json.dumps(response_body),
+        headers={'Content-Type': 'application/json'}
+    )
+    print(f"Response status: {response.status}")
+            """),
+            timeout=cdk.Duration.minutes(5)
+        )
+        
+        # Grant S3 permissions to the Lambda
+        self.bucket.grant_write(config_lambda)
+        
+        # Grant API Gateway permissions to retrieve API key
+        config_lambda.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["apigateway:GET"],
+                resources=[f"arn:aws:apigateway:{cdk.Aws.REGION}::/apikeys/*"]
+            )
+        )
+        
+        # Create custom resource
+        self.config_updater = cr.AwsCustomResource(
+            self,
+            "FrontendConfigUpdater",
+            on_create=cr.AwsSdkCall(
+                service="Lambda",
+                action="invoke",
+                parameters={
+                    "FunctionName": config_lambda.function_name,
+                    "Payload": json.dumps({
+                        "RequestType": "Create",
+                        "ResourceProperties": {
+                            "BucketName": self.bucket.bucket_name,
+                            "ApiUrl": self.api_url,
+                            "ApiKeyId": self.api_key_id,
+                            "Environment": self.environment
+                        }
+                    })
+                },
+                physical_resource_id=cr.PhysicalResourceId.of("frontend-config-updater")
+            ),
+            on_update=cr.AwsSdkCall(
+                service="Lambda",
+                action="invoke",
+                parameters={
+                    "FunctionName": config_lambda.function_name,
+                    "Payload": json.dumps({
+                        "RequestType": "Update",
+                        "ResourceProperties": {
+                            "BucketName": self.bucket.bucket_name,
+                            "ApiUrl": self.api_url,
+                            "ApiKeyId": self.api_key_id,
+                            "Environment": self.environment
+                        }
+                    })
+                }
+            ),
+            policy=cr.AwsCustomResourcePolicy.from_statements([
+                iam.PolicyStatement(
+                    actions=["lambda:InvokeFunction"],
+                    resources=[config_lambda.function_arn]
+                )
+            ])
+        )
+        
+        # Ensure config is created after the main deployment
+        self.config_updater.node.add_dependency(self.deployment)
     
     def _setup_monitoring(self) -> None:
         """Set up monitoring for the frontend."""

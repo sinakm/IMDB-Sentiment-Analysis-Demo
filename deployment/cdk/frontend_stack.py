@@ -67,14 +67,14 @@ class SentimentAnalysisFrontendStack(Stack):
     def _import_api_details(self) -> None:
         """Import API URL and API Key from the API stack."""
         
-        # Import API URL from the API stack export (without -prod suffix)
+        # Import API URL from the API stack export (with environment suffix)
         self.api_url = cdk.Fn.import_value(
-            "SentimentAnalysis-ApiUrl"
+            f"SentimentAnalysis-{self.env_name}-ApiUrl"
         )
         
-        # Import API Key ID from the API stack export (without -prod suffix)
+        # Import API Key ID from the API stack export (with environment suffix)
         self.api_key_id = cdk.Fn.import_value(
-            "SentimentAnalysis-ApiKeyId"
+            f"SentimentAnalysis-{self.env_name}-ApiKeyId"
         )
         
         print(f"Frontend stack will use API from: {self.api_stack_name}")
@@ -153,7 +153,7 @@ Frontend deployed successfully!
 - Website URL: {self.frontend_construct.website_url}
 - S3 Bucket: {self.frontend_construct.bucket_name}
 - Environment: {self.env_name}
-- API Integration: Configured via build-time environment variables
+- API Integration: Configured via runtime injection (env.js)
             """.strip(),
             description="Frontend deployment summary"
         )
