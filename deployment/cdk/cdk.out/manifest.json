@@ -1,38 +1,39 @@
 {
   "version": "44.0.0",
   "artifacts": {
-    "SentimentAnalysisStack.assets": {
+    "SentimentAnalysisStack-prod.assets": {
       "type": "cdk:asset-manifest",
       "properties": {
-        "file": "SentimentAnalysisStack.assets.json",
+        "file": "SentimentAnalysisStack-prod.assets.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
       }
     },
-    "SentimentAnalysisStack": {
+    "SentimentAnalysisStack-prod": {
       "type": "aws:cloudformation:stack",
       "environment": "aws://unknown-account/us-east-1",
       "properties": {
-        "templateFile": "SentimentAnalysisStack.template.json",
+        "templateFile": "SentimentAnalysisStack-prod.template.json",
         "terminationProtection": false,
         "tags": {
+          "Component": "API",
           "DeploymentMethod": "CDK",
           "Environment": "prod",
           "ManagedBy": "CDK",
           "ModelTypes": "LSTM-Verbalizer",
           "Owner": "ml-team",
-          "Project": "sentiment-analysis",
+          "Project": "SentimentAnalysis",
           "Service": "sentiment-analysis-api",
-          "StackName": "SentimentAnalysisStack"
+          "StackName": "SentimentAnalysisStack-prod"
         },
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/1748469df75e57f689e550bb26cd737538967bb36a124bb78187c1db01d414da.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/ce54cc8f0700987bb242470654780abc44a7dcfc82ad7a244483ed95e9e449af.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
-          "SentimentAnalysisStack.assets"
+          "SentimentAnalysisStack-prod.assets"
         ],
         "lookupRole": {
           "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-us-east-1",
@@ -41,13 +42,17 @@
         }
       },
       "dependencies": [
-        "SentimentAnalysisStack.assets"
+        "SentimentAnalysisStack-prod.assets"
       ],
       "metadata": {
-        "/SentimentAnalysisStack": [
+        "/SentimentAnalysisStack-prod": [
           {
             "type": "aws:cdk:stack-tags",
             "data": [
+              {
+                "Key": "Component",
+                "Value": "API"
+              },
               {
                 "Key": "DeploymentMethod",
                 "Value": "CDK"
@@ -70,7 +75,7 @@
               },
               {
                 "Key": "Project",
-                "Value": "sentiment-analysis"
+                "Value": "SentimentAnalysis"
               },
               {
                 "Key": "Service",
@@ -78,36 +83,36 @@
               },
               {
                 "Key": "StackName",
-                "Value": "SentimentAnalysisStack"
+                "Value": "SentimentAnalysisStack-prod"
               }
             ]
           }
         ],
-        "/SentimentAnalysisStack/LambdaConstruct/ExecutionRole/Resource": [
+        "/SentimentAnalysisStack-prod/LambdaConstruct/ExecutionRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "LambdaConstructExecutionRole0DD1E121"
           }
         ],
-        "/SentimentAnalysisStack/LambdaConstruct/ExecutionRole/DefaultPolicy/Resource": [
+        "/SentimentAnalysisStack-prod/LambdaConstruct/ExecutionRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "LambdaConstructExecutionRoleDefaultPolicy31F9FBD4"
           }
         ],
-        "/SentimentAnalysisStack/LambdaConstruct/LogGroup/Resource": [
+        "/SentimentAnalysisStack-prod/LambdaConstruct/LogGroup/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "LambdaConstructLogGroup3DEBA95C"
           }
         ],
-        "/SentimentAnalysisStack/LambdaConstruct/Function/Resource": [
+        "/SentimentAnalysisStack-prod/LambdaConstruct/Function/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "LambdaConstructFunction651B616A"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi": [
           {
             "type": "Project",
             "data": "sentiment-analysis"
@@ -133,241 +138,393 @@
             "data": "API-Gateway"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApi5BCF74CD"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/CloudWatchRole/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/CloudWatchRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApiCloudWatchRole6F277622"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Account": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Account": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApiAccount7C618E08"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Deployment/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ApiGatewayConstructRestApiDeploymentD0BFA00F9fc4a5b157c65b2630ef825374d44a87"
+            "data": "ApiGatewayConstructRestApiDeploymentD0BFA00F37b87f54dfef4d0d5082df57aaf8c1af"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/DeploymentStage.prod/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/DeploymentStage.prod/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApiDeploymentStageprod15911FDB"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Endpoint": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Endpoint": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApiEndpointB786B18F"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/OPTIONS/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Default/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApiOPTIONSE0452EE5"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/predict/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Default/predict/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApipredictC8BF3EAA"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/predict/OPTIONS/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Default/predict/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApipredictOPTIONSE566FBA5"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/predict/POST/ApiPermission.SentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9.POST..predict": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Default/predict/POST/ApiPermission.SentimentAnalysisStackprodApiGatewayConstructRestApi8102119A.POST..predict": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ApiGatewayConstructRestApipredictPOSTApiPermissionSentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9POSTpredictCAAFF0E2"
+            "data": "ApiGatewayConstructRestApipredictPOSTApiPermissionSentimentAnalysisStackprodApiGatewayConstructRestApi8102119APOSTpredictA1BBCCA6"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/predict/POST/ApiPermission.Test.SentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9.POST..predict": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Default/predict/POST/ApiPermission.Test.SentimentAnalysisStackprodApiGatewayConstructRestApi8102119A.POST..predict": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ApiGatewayConstructRestApipredictPOSTApiPermissionTestSentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9POSTpredict2D111FE6"
+            "data": "ApiGatewayConstructRestApipredictPOSTApiPermissionTestSentimentAnalysisStackprodApiGatewayConstructRestApi8102119APOSTpredictDC6BF8D1"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/predict/POST/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Default/predict/POST/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApipredictPOSTB233EA2A"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/health/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Default/health/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApihealth991E6141"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/health/OPTIONS/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Default/health/OPTIONS/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApihealthOPTIONSAF9460C7"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/health/GET/ApiPermission.SentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9.GET..health": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Default/health/GET/ApiPermission.SentimentAnalysisStackprodApiGatewayConstructRestApi8102119A.GET..health": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ApiGatewayConstructRestApihealthGETApiPermissionSentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9GEThealth419AFFC0"
+            "data": "ApiGatewayConstructRestApihealthGETApiPermissionSentimentAnalysisStackprodApiGatewayConstructRestApi8102119AGEThealthD347FDB1"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/health/GET/ApiPermission.Test.SentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9.GET..health": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Default/health/GET/ApiPermission.Test.SentimentAnalysisStackprodApiGatewayConstructRestApi8102119A.GET..health": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ApiGatewayConstructRestApihealthGETApiPermissionTestSentimentAnalysisStackApiGatewayConstructRestApi4E0AF7C9GEThealth8BF5E6ED"
+            "data": "ApiGatewayConstructRestApihealthGETApiPermissionTestSentimentAnalysisStackprodApiGatewayConstructRestApi8102119AGEThealth88A1239A"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/Default/health/GET/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/Default/health/GET/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApihealthGET91EAB4C0"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/PredictRequestModel/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/PredictRequestModel/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApiPredictRequestModel0AE65827"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/SuccessResponseModel/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/SuccessResponseModel/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApiSuccessResponseModel874B7DE1"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/ErrorResponseModel/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/ErrorResponseModel/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApiErrorResponseModel84BFC13C"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/RequestValidator/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/RequestValidator/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApiRequestValidator353D0C6D"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/ApiKey/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/ApiKey/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApiApiKey69F04C6C"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/UsagePlan/Resource": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/UsagePlan/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "ApiGatewayConstructRestApiUsagePlanA38B8389"
           }
         ],
-        "/SentimentAnalysisStack/ApiGatewayConstruct/RestApi/UsagePlan/UsagePlanKeyResource:SentimentAnalysisStackApiGatewayConstructRestApiApiKey02E4207F": [
+        "/SentimentAnalysisStack-prod/ApiGatewayConstruct/RestApi/UsagePlan/UsagePlanKeyResource:SentimentAnalysisStackprodApiGatewayConstructRestApiApiKey1998E052": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "ApiGatewayConstructRestApiUsagePlanUsagePlanKeyResourceSentimentAnalysisStackApiGatewayConstructRestApiApiKey02E4207F85EAB081"
+            "data": "ApiGatewayConstructRestApiUsagePlanUsagePlanKeyResourceSentimentAnalysisStackprodApiGatewayConstructRestApiApiKey1998E0528BC3FE87"
           }
         ],
-        "/SentimentAnalysisStack/MonitoringConstruct/AlarmErrorRate/Resource": [
+        "/SentimentAnalysisStack-prod/MonitoringConstruct/AlarmErrorRate/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "MonitoringConstructAlarmErrorRate70D4AB7A"
           }
         ],
-        "/SentimentAnalysisStack/MonitoringConstruct/AlarmDuration/Resource": [
+        "/SentimentAnalysisStack-prod/MonitoringConstruct/AlarmDuration/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "MonitoringConstructAlarmDurationB9C8C4E2"
           }
         ],
-        "/SentimentAnalysisStack/MonitoringConstruct/AlarmThrottles/Resource": [
+        "/SentimentAnalysisStack-prod/MonitoringConstruct/AlarmThrottles/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "MonitoringConstructAlarmThrottles3A9F8382"
           }
         ],
-        "/SentimentAnalysisStack/MonitoringConstruct/Api4XXErrorAlarm/Resource": [
+        "/SentimentAnalysisStack-prod/MonitoringConstruct/Api4XXErrorAlarm/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "MonitoringConstructApi4XXErrorAlarmDF4BBF28"
           }
         ],
-        "/SentimentAnalysisStack/MonitoringConstruct/Api5XXErrorAlarm/Resource": [
+        "/SentimentAnalysisStack-prod/MonitoringConstruct/Api5XXErrorAlarm/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "MonitoringConstructApi5XXErrorAlarm96DB23E6"
           }
         ],
-        "/SentimentAnalysisStack/MonitoringConstruct/ApiLatencyAlarm/Resource": [
+        "/SentimentAnalysisStack-prod/MonitoringConstruct/ApiLatencyAlarm/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "MonitoringConstructApiLatencyAlarm8CE2EC7F"
           }
         ],
-        "/SentimentAnalysisStack/MonitoringConstruct/Dashboard/Resource": [
+        "/SentimentAnalysisStack-prod/MonitoringConstruct/Dashboard/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "MonitoringConstructDashboard77F744AF"
           }
         ],
-        "/SentimentAnalysisStack/FrontendConstruct/FrontendBucket/Resource": [
+        "/SentimentAnalysisStack-prod/ApiUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiUrl"
+          }
+        ],
+        "/SentimentAnalysisStack-prod/PredictEndpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PredictEndpoint"
+          }
+        ],
+        "/SentimentAnalysisStack-prod/HealthEndpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "HealthEndpoint"
+          }
+        ],
+        "/SentimentAnalysisStack-prod/ApiKeyId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiKeyId"
+          }
+        ],
+        "/SentimentAnalysisStack-prod/ApiKeyCommand": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ApiKeyCommand"
+          }
+        ],
+        "/SentimentAnalysisStack-prod/LambdaFunctionName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LambdaFunctionName"
+          }
+        ],
+        "/SentimentAnalysisStack-prod/LambdaFunctionArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LambdaFunctionArn"
+          }
+        ],
+        "/SentimentAnalysisStack-prod/DashboardUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DashboardUrl"
+          }
+        ],
+        "/SentimentAnalysisStack-prod/UsageInstructions": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UsageInstructions"
+          }
+        ],
+        "/SentimentAnalysisStack-prod/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/SentimentAnalysisStack-prod/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/SentimentAnalysisStack-prod/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "SentimentAnalysisStack-prod"
+    },
+    "SentimentAnalysisFrontendStack-prod.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "SentimentAnalysisFrontendStack-prod.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "SentimentAnalysisFrontendStack-prod": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://unknown-account/us-east-1",
+      "properties": {
+        "templateFile": "SentimentAnalysisFrontendStack-prod.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Component": "Frontend",
+          "DeploymentMethod": "CDK",
+          "Environment": "prod",
+          "ManagedBy": "CDK",
+          "Owner": "ml-team",
+          "Project": "SentimentAnalysis",
+          "Service": "sentiment-analysis-frontend",
+          "StackName": "SentimentAnalysisFrontendStack-prod"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/f992f550c84af9ec2df925cc5d4e389bc24478f6b3784c62cb63e135d742fea3.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "SentimentAnalysisFrontendStack-prod.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-us-east-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "SentimentAnalysisStack-prod",
+        "SentimentAnalysisFrontendStack-prod.assets"
+      ],
+      "metadata": {
+        "/SentimentAnalysisFrontendStack-prod": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Component",
+                "Value": "Frontend"
+              },
+              {
+                "Key": "DeploymentMethod",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Environment",
+                "Value": "prod"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Owner",
+                "Value": "ml-team"
+              },
+              {
+                "Key": "Project",
+                "Value": "SentimentAnalysis"
+              },
+              {
+                "Key": "Service",
+                "Value": "sentiment-analysis-frontend"
+              },
+              {
+                "Key": "StackName",
+                "Value": "SentimentAnalysisFrontendStack-prod"
+              }
+            ]
+          }
+        ],
+        "/SentimentAnalysisFrontendStack-prod/FrontendConstruct/FrontendBucket/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "FrontendConstructFrontendBucketEA061DFC"
           }
         ],
-        "/SentimentAnalysisStack/FrontendConstruct/FrontendBucket/Policy/Resource": [
+        "/SentimentAnalysisFrontendStack-prod/FrontendConstruct/FrontendBucket/Policy/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "FrontendConstructFrontendBucketPolicyA88520BE"
           }
         ],
-        "/SentimentAnalysisStack/FrontendConstruct/FrontendOAI/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "FrontendConstructFrontendOAI3A349E81"
-          }
-        ],
-        "/SentimentAnalysisStack/FrontendConstruct/FrontendDistribution/Origin1/S3OriginAccessControl/Resource": [
+        "/SentimentAnalysisFrontendStack-prod/FrontendConstruct/FrontendDistribution/Origin1/S3OriginAccessControl/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "FrontendConstructFrontendDistributionOrigin1S3OriginAccessControlD5F33C8B"
           }
         ],
-        "/SentimentAnalysisStack/FrontendConstruct/FrontendDistribution/Origin2/S3OriginAccessControl/Resource": [
+        "/SentimentAnalysisFrontendStack-prod/FrontendConstruct/FrontendDistribution/Origin2/S3OriginAccessControl/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "FrontendConstructFrontendDistributionOrigin2S3OriginAccessControl433BF098"
           }
         ],
-        "/SentimentAnalysisStack/FrontendConstruct/FrontendDistribution/Resource": [
+        "/SentimentAnalysisFrontendStack-prod/FrontendConstruct/FrontendDistribution/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "FrontendConstructFrontendDistribution37614C4A"
           }
         ],
-        "/SentimentAnalysisStack/FrontendConstruct/FrontendDeployment/AwsCliLayer/Resource": [
+        "/SentimentAnalysisFrontendStack-prod/FrontendConstruct/FrontendDeployment/AwsCliLayer/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "FrontendConstructFrontendDeploymentAwsCliLayer14BFEDB4"
           }
         ],
-        "/SentimentAnalysisStack/FrontendConstruct/FrontendDeployment/CustomResource/Default": [
+        "/SentimentAnalysisFrontendStack-prod/FrontendConstruct/FrontendDeployment/CustomResource/Default": [
           {
             "type": "aws:cdk:logicalId",
             "data": "FrontendConstructFrontendDeploymentCustomResourceAD7BDFF1"
           }
         ],
-        "/SentimentAnalysisStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C": [
+        "/SentimentAnalysisFrontendStack-prod/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C": [
           {
             "type": "aws:cdk:is-custom-resource-handler-singleton",
             "data": true
@@ -377,116 +534,74 @@
             "data": 2
           }
         ],
-        "/SentimentAnalysisStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource": [
+        "/SentimentAnalysisFrontendStack-prod/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
           }
         ],
-        "/SentimentAnalysisStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource": [
+        "/SentimentAnalysisFrontendStack-prod/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF"
           }
         ],
-        "/SentimentAnalysisStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource": [
+        "/SentimentAnalysisFrontendStack-prod/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536"
           }
         ],
-        "/SentimentAnalysisStack/ApiUrl": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ApiUrl"
-          }
-        ],
-        "/SentimentAnalysisStack/PredictEndpoint": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "PredictEndpoint"
-          }
-        ],
-        "/SentimentAnalysisStack/HealthEndpoint": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "HealthEndpoint"
-          }
-        ],
-        "/SentimentAnalysisStack/ApiKeyId": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ApiKeyId"
-          }
-        ],
-        "/SentimentAnalysisStack/ApiKeyCommand": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "ApiKeyCommand"
-          }
-        ],
-        "/SentimentAnalysisStack/LambdaFunctionName": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "LambdaFunctionName"
-          }
-        ],
-        "/SentimentAnalysisStack/LambdaFunctionArn": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "LambdaFunctionArn"
-          }
-        ],
-        "/SentimentAnalysisStack/DashboardUrl": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "DashboardUrl"
-          }
-        ],
-        "/SentimentAnalysisStack/FrontendUrl": [
+        "/SentimentAnalysisFrontendStack-prod/FrontendUrl": [
           {
             "type": "aws:cdk:logicalId",
             "data": "FrontendUrl"
           }
         ],
-        "/SentimentAnalysisStack/FrontendBucket": [
+        "/SentimentAnalysisFrontendStack-prod/FrontendBucket": [
           {
             "type": "aws:cdk:logicalId",
             "data": "FrontendBucket"
           }
         ],
-        "/SentimentAnalysisStack/CloudFrontDistributionId": [
+        "/SentimentAnalysisFrontendStack-prod/CloudFrontDistributionId": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CloudFrontDistributionId"
           }
         ],
-        "/SentimentAnalysisStack/UsageInstructions": [
+        "/SentimentAnalysisFrontendStack-prod/CloudFrontDomainName": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "UsageInstructions"
+            "data": "CloudFrontDomainName"
           }
         ],
-        "/SentimentAnalysisStack/CDKMetadata/Default": [
+        "/SentimentAnalysisFrontendStack-prod/DeploymentInfo": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "DeploymentInfo"
+          }
+        ],
+        "/SentimentAnalysisFrontendStack-prod/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
           }
         ],
-        "/SentimentAnalysisStack/BootstrapVersion": [
+        "/SentimentAnalysisFrontendStack-prod/BootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "BootstrapVersion"
           }
         ],
-        "/SentimentAnalysisStack/CheckBootstrapVersion": [
+        "/SentimentAnalysisFrontendStack-prod/CheckBootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CheckBootstrapVersion"
           }
         ]
       },
-      "displayName": "SentimentAnalysisStack"
+      "displayName": "SentimentAnalysisFrontendStack-prod"
     },
     "Tree": {
       "type": "cdk:tree",

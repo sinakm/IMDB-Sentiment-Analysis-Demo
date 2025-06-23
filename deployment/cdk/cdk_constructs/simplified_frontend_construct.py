@@ -1,15 +1,17 @@
 """
-CDK Construct for deploying React frontend to S3 and CloudFront.
+Simplified CDK Construct for deploying React frontend to S3 and CloudFront.
 
 This construct handles:
-- Building the React application
+- Building the React application with API configuration at build time
 - Deploying to S3 bucket
 - Setting up CloudFront distribution
 - Configuring proper caching and security headers
+
+No custom resources needed - all configuration is done at build time.
 """
 
 import os
-import subprocess
+import time
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -18,24 +20,25 @@ from aws_cdk import (
     aws_s3 as s3,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
-    aws_s3_deployment as s3deploy,
-    aws_iam as iam,
-    aws_lambda as _lambda
+    aws_s3_deployment as s3deploy
 )
 from constructs import Construct
 
 from config.frontend_config import FrontendConfig, BuildConfig, DeploymentConfig
 
 
-class SentimentFrontendConstruct(Construct):
+class SimplifiedSentimentFrontendConstruct(Construct):
     """
-    CDK Construct for deploying the React frontend.
+    Simplified CDK Construct for deploying the React frontend.
     
     This construct creates:
     - S3 bucket for hosting static files
     - CloudFront distribution for global CDN
-    - Build process for React application
+    - Build process for React application with API configuration
     - Proper caching and security configurations
+    
+    All API configuration is injected at build time, eliminating the need
+    for custom resources and runtime configuration updates.
     """
 
     def __init__(
@@ -65,13 +68,10 @@ class SentimentFrontendConstruct(Construct):
         # Create S3 bucket
         self._create_s3_bucket()
         
-        # Build React application
-        self._build_react_app()
-        
         # Create CloudFront distribution
         self._create_cloudfront_distribution()
         
-        # Deploy to S3
+        # Deploy to S3 with build-time configuration
         self._deploy_to_s3()
         
         # Set up monitoring (if enabled)
@@ -93,8 +93,8 @@ class SentimentFrontendConstruct(Construct):
     def _create_s3_bucket(self) -> None:
         """Create S3 bucket for hosting the frontend."""
         
-        # Generate unique bucket name
-        bucket_name = f"{self.frontend_config.bucket_name_prefix}-{self.environment}-{cdk.Aws.ACCOUNT_ID}"
+        # Generate unique bucket name with timestamp to avoid conflicts
+        bucket_name = f"{self.frontend_config.bucket_name_prefix}-{self.environment}-{cdk.Aws.ACCOUNT_ID}-{int(time.time())}"
         
         # Create S3 bucket
         self.bucket = s3.Bucket(
@@ -104,7 +104,7 @@ class SentimentFrontendConstruct(Construct):
             versioned=self.frontend_config.enable_versioning,
             removal_policy=cdk.RemovalPolicy.DESTROY if self.environment == "dev" else cdk.RemovalPolicy.RETAIN,
             auto_delete_objects=self.environment == "dev",
-            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,  # CloudFront will access via OAI
+            block_public_access=s3.BlockPublicAccess.BLOCK_ALL,  # CloudFront will access via OAC
             encryption=s3.BucketEncryption.S3_MANAGED,
             lifecycle_rules=[
                 s3.LifecycleRule(
@@ -120,48 +120,13 @@ class SentimentFrontendConstruct(Construct):
         cdk.Tags.of(self.bucket).add("Service", "sentiment-analysis-frontend")
         cdk.Tags.of(self.bucket).add("Component", "static-hosting")
     
-    def _build_react_app(self) -> None:
-        """Build the React application with environment variables."""
-        
-        # Get the frontend source directory
-        frontend_dir = Path(__file__).parent.parent / self.frontend_config.source_directory
-        
-        if not frontend_dir.exists():
-            raise ValueError(f"Frontend directory not found: {frontend_dir}")
-        
-        # Prepare environment variables for build
-        build_env = {
-            **os.environ,
-            **self.build_config.build_environment,
-            "REACT_APP_API_URL": self.api_url,
-            "REACT_APP_API_KEY_ID": self.api_key_id,
-            **self.frontend_config.environment_variables
-        }
-        
-        # Store build environment for deployment
-        self.build_env = build_env
-        self.frontend_dir = frontend_dir
-        
-        print(f"Frontend will be built from: {frontend_dir}")
-        print(f"API URL will be: {self.api_url}")
-    
     def _create_cloudfront_distribution(self) -> None:
         """Create CloudFront distribution."""
         
         if not self.frontend_config.enable_cloudfront:
             return
         
-        # Create Origin Access Identity
-        self.oai = cloudfront.OriginAccessIdentity(
-            self,
-            "FrontendOAI",
-            comment=f"OAI for {self.frontend_config.bucket_name_prefix}-{self.environment}"
-        )
-        
-        # Grant CloudFront access to S3 bucket
-        self.bucket.grant_read(self.oai)
-        
-        # Create CloudFront distribution
+        # Create CloudFront distribution with Origin Access Control
         self.distribution = cloudfront.Distribution(
             self,
             "FrontendDistribution",
@@ -211,22 +176,31 @@ class SentimentFrontendConstruct(Construct):
         cdk.Tags.of(self.distribution).add("Component", "cdn")
     
     def _deploy_to_s3(self) -> None:
-        """Deploy the built React app to S3."""
+        """Deploy the built React app to S3 with API configuration."""
         
-        # Build the frontend with placeholder values first
-        # We'll replace these with actual values after the API Gateway is deployed
+        # Get the frontend source directory
+        frontend_dir = Path(__file__).parent.parent / self.frontend_config.source_directory
+        
+        if not frontend_dir.exists():
+            raise ValueError(f"Frontend directory not found: {frontend_dir}")
+        
+        # Prepare build environment with API configuration
         build_env = {
-            "NODE_ENV": "production",
-            "GENERATE_SOURCEMAP": "false",
-            "REACT_APP_API_URL": "https://api.placeholder.com/",
-            "REACT_APP_API_KEY_ID": "placeholder-key-id"
+            **self.build_config.build_environment,
+            "REACT_APP_API_URL": self.api_url,
+            "REACT_APP_API_KEY_ID": self.api_key_id,
+            **self.frontend_config.environment_variables
         }
         
+        print(f"Frontend will be built from: {frontend_dir}")
+        print(f"API URL will be: {self.api_url}")
+        
+        # Deploy with build-time configuration
         self.deployment = s3deploy.BucketDeployment(
             self,
             "FrontendDeployment",
             sources=[s3deploy.Source.asset(
-                str(self.frontend_dir),
+                str(frontend_dir),
                 exclude=[
                     "node_modules",
                     "build",
@@ -235,21 +209,29 @@ class SentimentFrontendConstruct(Construct):
                     ".env.local",
                     ".env.development.local", 
                     ".env.test.local",
-                    "coverage"
+                    "coverage",
+                    ".DS_Store"
                 ],
                 bundling=cdk.BundlingOptions(
-                    image=cdk.DockerImage.from_registry("node:18-alpine"),
+                    image=cdk.DockerImage.from_registry("node:20-alpine"),  # Updated to Node 20
                     environment=build_env,
                     command=[
                         "sh", "-c",
                         """
                         cd /asset-input &&
-                        npm cache clean --force &&
+                        echo "Installing dependencies..." &&
+                        rm -rf node_modules/.cache || true &&
+                        rm -rf node_modules || true &&
                         npm install &&
+                        echo "Building React application..." &&
+                        echo "API URL: $REACT_APP_API_URL" &&
+                        echo "API Key ID: $REACT_APP_API_KEY_ID" &&
                         npm run build &&
+                        echo "Build completed successfully" &&
                         cp -r build/* /asset-output/
                         """
-                    ]
+                    ],
+                    user="root"
                 )
             )],
             destination_bucket=self.bucket,
@@ -260,98 +242,6 @@ class SentimentFrontendConstruct(Construct):
         # Ensure deployment happens after distribution is created
         if hasattr(self, 'distribution'):
             self.deployment.node.add_dependency(self.distribution)
-        
-        # Create a custom resource to update the frontend config after deployment
-        self._create_config_updater()
-    
-    def _create_config_updater(self) -> None:
-        """Create a custom resource to update frontend configuration with real API values."""
-        
-        # Create a Lambda function to update the frontend configuration
-        config_updater_function = _lambda.Function(
-            self,
-            "ConfigUpdater",
-            runtime=_lambda.Runtime.PYTHON_3_9,
-            handler="index.handler",
-            code=_lambda.Code.from_inline(f"""
-import json
-import boto3
-import urllib3
-
-def handler(event, context):
-    print(f"Event: {{json.dumps(event)}}")
-    
-    if event['RequestType'] == 'Delete':
-        return send_response(event, context, 'SUCCESS', {{}})
-    
-    try:
-        # Get the actual API URL and key from the event
-        api_url = event['ResourceProperties']['ApiUrl']
-        api_key_id = event['ResourceProperties']['ApiKeyId']
-        bucket_name = event['ResourceProperties']['BucketName']
-        
-        # Create a simple config.js file that the frontend can load
-        config_content = f'''
-window.REACT_APP_CONFIG = {{
-    API_URL: "{{api_url}}",
-    API_KEY_ID: "{{api_key_id}}"
-}};
-'''.format(api_url=api_url, api_key_id=api_key_id)
-        
-        # Upload the config file to S3
-        s3 = boto3.client('s3')
-        s3.put_object(
-            Bucket=bucket_name,
-            Key='config.js',
-            Body=config_content,
-            ContentType='application/javascript',
-            CacheControl='no-cache'
-        )
-        
-        print(f"Successfully updated frontend config in bucket {{bucket_name}}")
-        return send_response(event, context, 'SUCCESS', {{'ConfigUrl': f'https://{{bucket_name}}.s3.amazonaws.com/config.js'}})
-        
-    except Exception as e:
-        print(f"Error: {{str(e)}}")
-        return send_response(event, context, 'FAILED', {{}})
-
-def send_response(event, context, status, data):
-    response_body = {{
-        'Status': status,
-        'Reason': f'See CloudWatch Log Stream: {{context.log_stream_name}}',
-        'PhysicalResourceId': context.log_stream_name,
-        'StackId': event['StackId'],
-        'RequestId': event['RequestId'],
-        'LogicalResourceId': event['LogicalResourceId'],
-        'Data': data
-    }}
-    
-    http = urllib3.PoolManager()
-    response = http.request('PUT', event['ResponseURL'], 
-                          body=json.dumps(response_body),
-                          headers={{'Content-Type': 'application/json'}})
-    return response_body
-            """),
-            timeout=cdk.Duration.minutes(5)
-        )
-        
-        # Grant the function permission to write to the S3 bucket
-        self.bucket.grant_write(config_updater_function)
-        
-        # Create the custom resource
-        config_updater = cdk.CustomResource(
-            self,
-            "FrontendConfigUpdater",
-            service_token=config_updater_function.function_arn,
-            properties={
-                "ApiUrl": self.api_url,
-                "ApiKeyId": self.api_key_id,
-                "BucketName": self.bucket.bucket_name
-            }
-        )
-        
-        # Ensure this runs after the initial deployment
-        config_updater.node.add_dependency(self.deployment)
     
     def _setup_monitoring(self) -> None:
         """Set up monitoring for the frontend."""
@@ -395,5 +285,7 @@ def send_response(event, context, status, data):
             "bucket_arn": self.bucket_arn,
             "distribution_id": self.distribution_id or "N/A",
             "website_url": self.website_url,
-            "environment": self.environment
+            "environment": self.environment,
+            "api_url": self.api_url,
+            "configuration_method": "build-time"
         }

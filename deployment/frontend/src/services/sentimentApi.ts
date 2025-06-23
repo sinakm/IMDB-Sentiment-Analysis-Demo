@@ -1,12 +1,36 @@
 import axios from "axios";
 import { SentimentRequest, SentimentResponse } from "../types/sentiment";
 
-// API configuration - these will be injected by CDK during build
-const API_BASE_URL =
-  process.env.REACT_APP_API_URL ||
-  "https://uzjgoui01j.execute-api.us-east-1.amazonaws.com/prod";
-const API_KEY =
-  process.env.REACT_APP_API_KEY || "c3hzku1RtW3W8xWcXIGr430tfwN6jEcE3rO5RXH5";
+// Declare global interface for runtime config
+declare global {
+  interface Window {
+    REACT_APP_CONFIG?: {
+      API_URL: string;
+      API_KEY_ID: string;
+    };
+  }
+}
+
+// API configuration - will be loaded from runtime config or environment
+const getApiConfig = () => {
+  // Check if runtime config is available (injected by CDK custom resource)
+  if (window.REACT_APP_CONFIG) {
+    return {
+      baseUrl: window.REACT_APP_CONFIG.API_URL,
+      apiKey: window.REACT_APP_CONFIG.API_KEY_ID,
+    };
+  }
+
+  // Fallback to placeholder values (will be replaced during build)
+  return {
+    baseUrl: "https://api.placeholder.com/",
+    apiKey: "placeholder-key-id",
+  };
+};
+
+const config = getApiConfig();
+const API_BASE_URL = config.baseUrl;
+const API_KEY = config.apiKey;
 
 // Create axios instance with default configuration
 const apiClient = axios.create({
