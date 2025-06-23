@@ -1,30 +1,11 @@
 import axios from "axios";
 import { SentimentRequest, SentimentResponse } from "../types/sentiment";
 
-// Declare global interface for runtime config
-declare global {
-  interface Window {
-    REACT_APP_CONFIG?: {
-      API_URL: string;
-      API_KEY_ID: string;
-    };
-  }
-}
-
-// API configuration - will be loaded from runtime config or environment
+// API configuration - loaded from build-time environment variables
 const getApiConfig = () => {
-  // Check if runtime config is available (injected by CDK custom resource)
-  if (window.REACT_APP_CONFIG) {
-    return {
-      baseUrl: window.REACT_APP_CONFIG.API_URL,
-      apiKey: window.REACT_APP_CONFIG.API_KEY_ID,
-    };
-  }
-
-  // Fallback to placeholder values (will be replaced during build)
   return {
-    baseUrl: "https://api.placeholder.com/",
-    apiKey: "placeholder-key-id",
+    baseUrl: process.env.REACT_APP_API_URL || "https://api.placeholder.com/",
+    apiKey: process.env.REACT_APP_API_KEY_ID || "placeholder-key-id",
   };
 };
 

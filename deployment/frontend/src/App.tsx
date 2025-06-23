@@ -16,9 +16,9 @@ import {
   Psychology as PsychologyIcon,
 } from "@mui/icons-material";
 
-import SentimentForm from "./components/SentimentForm.tsx";
-import SentimentGauge from "./components/SentimentGauge.tsx";
-import SentimentApiService from "./services/sentimentApi.ts";
+import SentimentForm from "./components/SentimentForm";
+import SentimentGauge from "./components/SentimentGauge";
+import SentimentApiService from "./services/sentimentApi";
 import {
   SentimentFormData,
   SentimentResponse,

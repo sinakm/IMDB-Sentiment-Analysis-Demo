@@ -1,6 +1,12 @@
 import React from "react";
-import { Box, Typography, Card, CardContent, Chip } from "@mui/material";
-import { Gauge } from "@mui/x-charts/Gauge";
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+} from "@mui/material";
 import { SentimentPrediction } from "../types/sentiment";
 
 interface SentimentGaugeProps {
@@ -107,39 +113,45 @@ const SentimentGauge: React.FC<SentimentGaugeProps> = ({
             }}
           >
             <Box sx={{ position: "relative", mb: 2 }}>
-              <Gauge
-                width={200}
-                height={200}
-                value={confidencePercentage}
-                startAngle={-110}
-                endAngle={110}
-                sx={{
-                  [`& .MuiGauge-valueText`]: {
-                    fontSize: 20,
-                    fontWeight: "bold",
-                    fill: gaugeColor,
-                  },
-                  [`& .MuiGauge-valueArc`]: {
-                    fill: gaugeColor,
-                  },
-                  [`& .MuiGauge-referenceArc`]: {
-                    fill: "#e0e0e0",
-                  },
-                }}
-                text={({ value }) => `${value}%`}
-              />
-
-              {/* Sentiment icon overlay - positioned well below the percentage */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  top: "85%",
-                  left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  fontSize: "2rem",
-                }}
-              >
-                {sentimentIcon}
+              {/* Custom Circular Progress Gauge */}
+              <Box sx={{ position: "relative", display: "inline-flex" }}>
+                <CircularProgress
+                  variant="determinate"
+                  value={confidencePercentage}
+                  size={200}
+                  thickness={4}
+                  sx={{
+                    color: gaugeColor,
+                    "& .MuiCircularProgress-circle": {
+                      strokeLinecap: "round",
+                    },
+                  }}
+                />
+                <Box
+                  sx={{
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    right: 0,
+                    position: "absolute",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Typography
+                    variant="h4"
+                    component="div"
+                    color={gaugeColor}
+                    sx={{ fontWeight: "bold" }}
+                  >
+                    {`${confidencePercentage}%`}
+                  </Typography>
+                  <Typography variant="h3" component="div" sx={{ mt: 1 }}>
+                    {sentimentIcon}
+                  </Typography>
+                </Box>
               </Box>
             </Box>
 
